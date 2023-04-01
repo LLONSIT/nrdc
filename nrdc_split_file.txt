@@ -1,0 +1,14 @@
+[split]
+
+/src/crc.c
+00400F00-004011AC
+
+/src/getcode.c
+004011B0-0040132C
+
+/src/main.c
+0040132C-00401E6C
+
+/src/rdc.c
+00401E6C-0040255C
+[/split]
