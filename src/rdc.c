@@ -2,8 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <unistd.h>
 #include "types.h"
-
+#define __USE_XOPEN
 
 static char B_10003600[0x20];
 static char B_10003620[0x20];
@@ -18,13 +19,13 @@ void dump(char *code) {
         printf(" +%x", sp24);
     }
 
-    printf("\n%08lx", 0x20);
+    printf("\n%08lx", (long)0x20);
 
     for(sp24 = 0 ; sp24  < 0x10 ; sp24++) {
         printf(" %02x", code[sp24]);
     }
 
-    printf("\n%08lx", 0x30);
+    printf("\n%08lx", (long)0x30);
 
     for(sp24 = 0x10 ; sp24  < 0x20 ; sp24++) {
         printf(" %02x", code[sp24]);
@@ -32,11 +33,9 @@ void dump(char *code) {
 }
 
 //func_00402018
-s32 check_modify_title(u8* arg0) {
+s32 check_modify_title(char* arg0) {
     s32 character;
     s32 sp0;
-
-
     sp0 = 0;
 
     for (character = *arg0 ; character != 0 ; character = *arg0 ) {
@@ -76,9 +75,8 @@ int check_modify_initcode(char* character) {
     return opt;
 }
 
-
 void nrdc_dump(s32 arg0, FILE *file) {
-    u8* code;
+    char* code;
 
     code = &B_10003600;
     fseek(file, 0x20, 0);
@@ -91,7 +89,7 @@ void nrdc_dump(s32 arg0, FILE *file) {
     printf("\n\nGame Title:   %.*s\nInitial Code: %.4s\nVersion:      %x\n\n", 20, code, &code[0x1B], code[0x1F]);
 }
 
-void nrdc_patch(int arg0, int arg1, struct FILE* arg2, char** arg3) {
+void nrdc_patch(int arg0, int arg1, FILE* arg2, char** arg3) {
     char* sp2C;
     char sp2B;
     int sp24;
@@ -117,7 +115,7 @@ void nrdc_patch(int arg0, int arg1, struct FILE* arg2, char** arg3) {
     }
     if (arg0 & 0x100) {
         if (check_modify_title(arg3[0]) != 0) {
-            printf("");
+            printf(" ");
         }
 
         for (sp24 = 0, sp2B = arg3[0][sp24]; sp2B != 0 && sp24 < 0x14; sp24++, sp2B = arg3[0][sp24]) {
@@ -127,7 +125,7 @@ void nrdc_patch(int arg0, int arg1, struct FILE* arg2, char** arg3) {
 
     if (arg0 & 0x200) {
         if (check_modify_title(arg3[1]) != 0) {
-            printf("");
+            printf(" ");
         }
         for (sp24 = 0, sp2B = arg3[1][sp24]; sp2B != 0 && sp24 < 4; sp24++, sp2B = arg3[1][sp24]) {
             sp2C[sp24 + 0x1B] = sp2B;
@@ -137,7 +135,7 @@ void nrdc_patch(int arg0, int arg1, struct FILE* arg2, char** arg3) {
     if (arg0 & 0x400) {
         if (!isalnum(*arg3[2])) {
             *arg3[2] = 0x30;
-            printf("");
+            printf(" ");
         }
         if (isdigit(*arg3[2])) {
             sp2C[0x1F] = (*arg3[2] - 0x30);

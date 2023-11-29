@@ -8,10 +8,14 @@
 //static s32 D_100032F0;
 static char *B_100035D0[15];
 static char* B_100035C0[100];
-//static char B_100035D0[1];
 static char *B_100035E8[100];
 static char B_100035EE[1];
 static u32 D_100032F0;
+
+//External declaration
+extern void nrdc_patch(int arg0, int arg1, FILE* arg2, char** arg3);
+extern void nrdc_dump(s32 arg0, FILE *file);
+extern void nrdc_crc(s32 arg0, FILE *arg1);
 
 void error(char* text) {
     fprintf(stderr, "Error: %s", text);
@@ -60,13 +64,13 @@ void get_patch_data(s32* arg0, u8*** arg1, s8* arg2, s32 arg3) {
 //static s32 B_100035C0[4];
 //static s32 D_100032F0;
 
-void get_patch_data(s32* arg0, u8*** parameter, s8* arg2, s32 arg3) {
+void get_patch_data(s32* arg0, char*** parameter, char* arg2, s32 arg3) {
     if (strncmp(**parameter, arg2, 2) == 0) {
         D_100032F0 |= (0x100 << arg3) | 4;
         if (*(**parameter + 2) != 0) {
-            B_100035C0[arg3] = (s32)(**parameter + 2);
+            B_100035C0[arg3] = (**parameter + 2);
         } else if (*arg0 > 1) {
-            B_100035C0[arg3] = (s32)(*++*parameter);
+            B_100035C0[arg3] = (*++*parameter);
             (*arg0)--;
         } else {
             printf("Error: Missing argument for option %s.\n", arg2);
@@ -132,7 +136,7 @@ char* trans_str(char* dest, char* src) {
     char* destp = dest;
     char ch;
 
-    while (ch = *srcp++) {
+    while ((ch = *srcp++))  {
         if (ch != '\\') { // copy most chars
             *destp++ = ch;
         } else if (*srcp == '\\') { // copy "\\" verbatim
@@ -202,10 +206,8 @@ s32 getendian(char* arg0) {
 }
 
 int main(int argc, char **argv) {
-    s32 sp2C;
-    s32 sp28;
-
-    sp28 = 1;
+    FILE* sp2C;
+    int sp28 = 1;
     printf("NINTENDO 64 Master Data Utility  Version 1.02\n");
     printf("Copyright(C) 1996 Nintendo Co.,LTD.\n\n");
     parse_arg(argc - 1, argv + 1);
@@ -227,7 +229,7 @@ int main(int argc, char **argv) {
 
     sp2C = fopen(argv[argc - 1], ((D_100032F0 & 4)) ? "rb+" : "rb");
     
-    if (sp2C == 0) {
+    if (sp2C == NULL) {
         error("No input file");
     }
     sp28 = getendian(argv[argc - 1]);

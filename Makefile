@@ -16,6 +16,8 @@ ROOT = tools/irix
 
 DIR = src
 
+AVOID_UB ?= 1
+
 #Yes, is this the 90's style?
 
 C_FILES = 	$(DIR)/rdc.c\
@@ -33,8 +35,7 @@ ifeq ($(CROSS),1)
  CFLAGS := -g0 -O1 -KPIC -mips1 -fullwarn -wlint,-fph -Wab, -Xcpluscomm -nostdinc -I $(ROOT)/usr/include
  CC := /usr/bin/qemu-irix -silent -L $(ROOT) $(ROOT)/usr/bin/cc
 else
-
- CFLAGS :=  -Wall -O1 -g0 -fPIC
+ CFLAGS :=  -Wall -ggdb3 -fPIC
 endif
 
 all:

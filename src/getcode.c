@@ -33,8 +33,8 @@ s32 getcode(s32* arg0, s32 arg1, u8 **c) {
     return 0;
 }
 #else
-s32 getcode(s32* arg0, const char* arg1, u8** c) {
-    u8 sp24[0xC]; // 7 + sizeof(".SRB")
+s32 getcode(s32* arg0, const char* arg1, char** c) {
+    char sp24[0xC]; // 7 + sizeof(".SRB")
     size_t sp20;
 
     sp20 = strlen(arg1);
