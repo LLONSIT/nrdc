@@ -3,11 +3,7 @@
 #include <assert.h>
 #include "types.h"
 
-static u8 B_100033A0[0x8]; //.bss
-static s32 D_100032E0 = 0; //.data
-static u16 B_100033A8[2];
-
-
+//Global Declaration
 static u16 getcrc(s32 (*arg0)(FILE*), FILE* arg1);
 
 void inittable(u16* arg0) {
@@ -24,11 +20,11 @@ void inittable(u16* arg0) {
 }
 
 s32 fgetc_rev(FILE* stream) {
-    // u8 temp_t3;
-
-    if (D_100032E0 == 0) {
-        B_100033A0[0] = fgetc(stream);
-        B_100033A0[1] = fgetc(stream);
+    static char buf[0x8]; //.bss
+    static int pos = 0; //.data
+    if (pos == 0) {
+        buf[0] = fgetc(stream);
+        buf[1] = fgetc(stream);
     }
 
     #ifdef __sgi
@@ -42,8 +38,8 @@ s32 fgetc_rev(FILE* stream) {
       assert(stream);
     }
 #endif
-     D_100032E0 ^= 1;
-    return B_100033A0[D_100032E0];
+     pos ^= 1;
+    return buf[pos];
 }
 
 void nrdc_crc(s32 arg0, FILE *arg1) {
@@ -53,14 +49,15 @@ void nrdc_crc(s32 arg0, FILE *arg1) {
 u16 getcrc(s32 (*arg0)(FILE*), FILE* arg1) {
     u16 sp26 = 0;
     s32 sp20;
+    static u16 crctable[2];
 
 #ifdef __sgi
-    inittable(&B_100033A8); //duhhhh
+    inittable(&crctable); //duhhhh
 #else
-    inittable(B_100033A8);
+    inittable(crctable);
 #endif
     while ((sp20 = arg0(arg1)) != -1) {
-        sp26 = B_100033A8[(sp26 >> 8) ^ sp20] ^ (sp26 << 8);
+        sp26 = crctable[(sp26 >> 8) ^ sp20] ^ (sp26 << 8);
     }
     return sp26;
 }

@@ -35,7 +35,7 @@ ifeq ($(CROSS),1)
  CFLAGS := -g0 -O1 -KPIC -mips1 -fullwarn -wlint,-fph -Wab, -Xcpluscomm -nostdinc -I $(ROOT)/usr/include
  CC := /usr/bin/qemu-irix -silent -L $(ROOT) $(ROOT)/usr/bin/cc
 else
- CFLAGS :=  -Wall -ggdb3 -fPIC
+ CFLAGS := -Wall -O1 -ggdb3 -fPIC -Wno-unused-function -Wno-incompatible-pointer-types
 endif
 
 all:

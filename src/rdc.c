@@ -1,56 +1,73 @@
+/*
+ * @file: rdc.c
+ * @brief: Nrdc functionality
+ * */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <unistd.h>
 #include "types.h"
-#define __USE_XOPEN
 
-static char B_10003600[0x20];
-static char B_10003620[0x20];
+extern void swab (const void *__restrict __from, void *__restrict __to,
+                  ssize_t __n) __THROW __nonnull ((1, 2))
+    __attr_access ((__read_only__, 1, 3))
+    __attr_access ((__write_only__, 2, 3));
+
+typedef struct {
+    char GameTitle[0x1B]; //!< Specified by -i
+    char initalCode; //!< Specified by -t
+    char unk1C[3]; //What?
+    char GameVersion; //!< Specified by -v
+} code;
+
+//TODO: dunno the correct size of these
+static char buf[0x20];
+static char litle_buf[0x20];
 
 //func_00401E70
-void dump(char *code) {
-    s32 sp24;
+static void dump(char *code) {
+    int i;
 
     printf("ROM ADDR");
 
-    for(sp24 = 0; sp24 < 0x10 ; sp24++) {
-        printf(" +%x", sp24);
+    for(i = 0; i < 0x10; i++) {
+        printf(" +%x", i);
     }
 
     printf("\n%08lx", (long)0x20);
 
-    for(sp24 = 0 ; sp24  < 0x10 ; sp24++) {
-        printf(" %02x", code[sp24]);
+    for(i = 0; i < 0x10; i++) {
+        printf(" %02x", code[i]);
     }
 
     printf("\n%08lx", (long)0x30);
 
-    for(sp24 = 0x10 ; sp24  < 0x20 ; sp24++) {
-        printf(" %02x", code[sp24]);
+    for(i = 0x10; i < 0x20; i++) {
+        printf(" %02x", code[i]);
     }
 }
 
 //func_00402018
-s32 check_modify_title(char* arg0) {
-    s32 character;
-    s32 sp0;
-    sp0 = 0;
+static int check_modify_title(char* arg0) {
+    int character;
+    int found = 0; //!< BOOL
+                   // 1: chr found
+                   // 0: chr not found
 
     for (character = *arg0 ; character != 0 ; character = *arg0 ) {
             if (!(isprint(character)) && (character >= 0xA1) && (character >= 0xDF)) {
-                sp0 = 1;
+                found = 1;
                 *arg0 = 0x3F;
             }
             arg0++;
         }
 
-    return sp0;
+    return found;
 }
 
 //func_00402018
-int check_modify_initcode(char* character) {
+static int check_modify_initcode(char* character) {
     int opt = 0;
 
     strupr(character);
@@ -76,38 +93,29 @@ int check_modify_initcode(char* character) {
 }
 
 void nrdc_dump(s32 arg0, FILE *file) {
-    char* code;
-
-    code = &B_10003600;
+    code* code = &buf;
     fseek(file, 0x20, 0);
-    fread(&B_10003600, 1, 0x20, file);
+    fread(&buf, 1, 0x20, file);
     if (arg0 == 1) {
-        swab(&B_10003600, &B_10003620, 0x20);
-        code = &B_10003620;
+        swab(&buf, &litle_buf, 0x20);
+        code = &litle_buf;
     }
-    dump(code);
-    printf("\n\nGame Title:   %.*s\nInitial Code: %.4s\nVersion:      %x\n\n", 20, code, &code[0x1B], code[0x1F]);
+    dump(code->GameTitle);
+    printf("\n\nGame Title:   %.*s\nInitial Code: %.4s\nVersion:      %x\n\n", 20,
+           code->GameTitle, &code->initalCode, code->GameVersion);
 }
 
 void nrdc_patch(int arg0, int arg1, FILE* arg2, char** arg3) {
     char* sp2C;
     char sp2B;
     int sp24;
-    // int temp_t2;
-    // int temp_t9;
-    // char temp_t3;
-    // char temp_t3_2;
-    // char temp_t4;
-    // char temp_t6;
-    // char temp_t6_2;
-    // char* temp_t2_2;
 
-    sp2C = B_10003600;
+    sp2C = buf;
     fseek(arg2, 0x20, 0);
-    fread(B_10003600, 1, 0x20, arg2);
+    fread(buf, 1, 0x20, arg2);
     if (arg1 == 1) {
-        swab(B_10003600, B_10003620, 0x20);
-        sp2C = B_10003620;
+        swab(buf, litle_buf, 0x20);
+        sp2C = litle_buf;
     }
     memset(sp2C + 0x14, 0, 7);
     if (arg0 & 0x100) {
@@ -144,10 +152,10 @@ void nrdc_patch(int arg0, int arg1, FILE* arg2, char** arg3) {
         }
     }
     if (arg1 == 1) {
-        swab(B_10003620, B_10003600, 0x20);
+        swab(litle_buf, buf, 0x20);
     }
     fseek(arg2, 0x20, 0);
-    fwrite(B_10003600, 1, 0x20, arg2);
+    fwrite(buf, 1, 0x20, arg2);
 }
 
 
