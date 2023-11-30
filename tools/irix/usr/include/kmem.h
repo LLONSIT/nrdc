@@ -19,7 +19,7 @@ extern "C" {
  * |         Sunnyvale, California 94088-3650, USA             |
  * |-----------------------------------------------------------|
  */
-/* $Header: /isms/cmplrs.src/v7.4/include/RCS/kmem.h,v 1.16 1997/03/21 22:53:40 ananth Exp $ */
+/* $Header: /hosts/bonnie/proj/irix6.4-ssg/isms/cmplrs/include/RCS/kmem.h,v 1.15 1996/02/07 22:54:24 davea Exp $ */
 
 /*
 	This header file contains basic definitions and declarations
@@ -293,10 +293,6 @@ kmem_get_region_number_given_name(kmem_t * /*kernel*/,
 Kmem_int
 kmem_get_end_text_address(kmem_t * /*kernel */,Kmem_int region,Kmem_uint64 *endaddr);
 
-Kmem_int
-kmem_get_eframe_info(kmem_t * /*kernel*/, void * /* ptr */,
-	Kmem_int * /* at */, Kmem_int * /* epc */,
-	Kmem_int * /* ra */, Kmem_int * /* size */);
 
 #ifdef __cplusplus
 }

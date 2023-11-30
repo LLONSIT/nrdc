@@ -1,14 +1,3 @@
-/**************************************************************************
- *									  *
- * 		 Copyright (C) 1990-1997 Silicon Graphics, Inc.		  *
- *									  *
- *  These coded instructions, statements, and computer programs  contain  *
- *  unpublished  proprietary  information of Silicon Graphics, Inc., and  *
- *  are protected by Federal copyright law.  They  may  not be disclosed  *
- *  to  third  parties  or copied or duplicated in any form, in whole or  *
- *  in part, without the prior written consent of Silicon Graphics, Inc.  *
- *									  *
- **************************************************************************/
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
 /*	  All Rights Reserved  	*/
 
@@ -19,12 +8,9 @@
 #ifndef _SYS_PROCSET_H
 #define _SYS_PROCSET_H
 
-#ident "$Revision: 1.12 $"
+#ident "$Revision: 1.6 $"
 
 #include <sys/types.h>
-#include <internal/sgimacros.h>
-
-__SGI_LIBC_BEGIN_EXTERN_C
 
 /*	This file defines the data needed to specify a set of
 **	processes.  These types are used by the sigsend, sigsendset,
@@ -42,12 +28,7 @@ __SGI_LIBC_BEGIN_EXTERN_C
 **	id together define a simple set of processes.
 */
 
-#if _SGIAPI
-typedef enum idtype
-#else
-typedef enum
-#endif /* _SGIAPI */
-{
+typedef enum idtype {
 	P_PID,		/* A process identifier.		*/
 	P_PPID,		/* A parent process identifier.		*/
 	P_PGID,		/* A process group (job control group)	*/
@@ -60,11 +41,11 @@ typedef enum
 } idtype_t;
 
 
-#if _SGIAPI || _ABIAPI
 /*	The following defines the operations which can be performed to
- *	combine two simple sets of processes to form another set of
- *	processes.
- */
+**	combine two simple sets of processes to form another set of
+**	processes.
+*/
+
 typedef enum idop {
 	POP_DIFF,	/* Set difference.  The processes which	*/
 			/* are in the left operand set and not	*/
@@ -80,10 +61,12 @@ typedef enum idop {
 			/* right operand sets but not in both.	*/
 } idop_t;
 
+
 /*	The following structure is used to define a set of processes.
- *	The set is defined in terms of two simple sets of processes
- *	and an operator which operates on these two operand sets.
- */
+**	The set is defined in terms of two simple sets of processes
+**	and an operator which operates on these two operand sets.
+*/
+
 typedef struct procset {
 	idop_t		p_op;	/* The operator connection the	*/
 				/* following two operands each	*/
@@ -101,9 +84,10 @@ typedef struct procset {
 	id_t		p_rid;	/* The id of the right operand.	*/
 } procset_t;
 
+
 /*	The following macro can be used to initialize a procset_t
- *	structure.
- */
+**	structure.
+*/
 
 #define	setprocset(psp, op, ltype, lid, rtype, rid) \
 			(psp)->p_op		= (op); \
@@ -112,17 +96,12 @@ typedef struct procset {
 			(psp)->p_ridtype	= (rtype); \
 			(psp)->p_rid		= (rid);
 
-#endif /* _SGIAPI || _ABIAPI */
-
 #ifdef _KERNEL
-struct vproc;
-struct vp_get_attr_s;
-extern int	checkprocset(procset_t *);
-extern id_t	getmyid(idtype_t, struct vp_get_attr_s *);
-extern int procinset(struct vproc *, procset_t *);
+struct proc;
+typedef int (*dotoprocfunc_t)(struct proc *, void *);
+extern int dotoprocs(procset_t *, dotoprocfunc_t, void *);
+extern int procinset(struct proc *, procset_t *);
 extern boolean_t cur_inset_only(procset_t *);
 #endif	/* _KERNEL */
-
-__SGI_LIBC_END_EXTERN_C
 
 #endif	/* _SYS_PROCSET_H */

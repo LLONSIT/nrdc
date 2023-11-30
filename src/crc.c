@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef __GNUC__
 #include <assert.h>
+#endif
 #include "types.h"
 
 //Global Declaration

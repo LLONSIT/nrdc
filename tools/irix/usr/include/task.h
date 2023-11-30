@@ -13,8 +13,11 @@
 #ifndef __TASK_H__
 #define __TASK_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#ident "$Revision: 3.42 $"
+#ident "$Revision: 3.33 $"
 /*
  * Header for tasking
  */
@@ -23,21 +26,12 @@
 #endif
 #include <ulocks.h>
 #include <sys/prctl.h>
-#include <internal/sgimacros.h>
-
-__SGI_LIBC_BEGIN_EXTERN_C
 
 #if (defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS))
 /*
  * the library portion of the PRDA
- * WARNING - this is only permitted to be 256 bytes (see sys/prctl.h)
- *
- * IMPORTANT: Whenever a change is made to prda_lib, make sure to run
- * 'make abifiles' in eoe/lib/libspypt/abi then compare the ptABI.h
- * and ptABID.h files to the ptABI.h.NEW and ptiABID.h.NEW files
- * respectively.  If the contents change make sure to check in the
- * changes to ptABI.h or ptABID.h as necessary.
  */
+typedef int tid_t;
 struct prda_lib {
 	tid_t		t_tid;
 	int		t_errno;
@@ -52,29 +46,10 @@ struct prda_lib {
 	void		*glx_client;
 	void		*ogl_context;
 	void		*ogl_dispatch[7];
-
-	/* stuff for SpeedShop */
-	void		*speedshop_data_ptr[5];
-
-	/* stuff for pthreads */
-	int		pthread_id;
-	int		pthread_cancel;	/* cancelability state */
-	void 		*pthread_data[6];
-	unsigned int	pthread_occluding; /* Atomic change of VP->vp_occlude */
-	char		pthread_unused[12];
-
-	/* Stuff for libc */
-	__uint32_t	libc_threadsafe_data;
 };
-
-/* check at compile time for too large an area */
-extern char __prda_lib_sz[257 - sizeof(struct prda_lib)];
-
 #define PRDALIB		((struct prda_lib *)(&PRDA->lib_prda))
 #define get_tid()	(PRDALIB->t_tid)
-#define get_pid()	((pid_t)(PRDA->t_sys.t_pid))
-#define get_rpid()	((pid_t)(PRDA->t_sys.t_rpid))
-#define get_cpu()	((int)(PRDA->t_sys.t_cpu))
+#define get_pid()	(PRDA->t_sys.t_pid)
 
 /*
  * library level task block
@@ -147,6 +122,8 @@ extern void 		m_unlock(void);
 #define cpus_online()	prctl(PR_MAXPPROCS)
 #endif /* (_LANGUAGE_C || _LANGUAGE_C_PLUS_PLUS) */
 
-__SGI_LIBC_END_EXTERN_C
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __TASK_H__ */

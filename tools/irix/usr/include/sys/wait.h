@@ -18,16 +18,12 @@
  */
 #ifndef __SYS_WAIT_H__
 #define __SYS_WAIT_H__
-#ident "$Revision: 1.47 $"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/*
- * WARNING - this file is a POSIX/XPG4 header - watch for name space pollution
- */
-#include <standards.h>
+#ident "$Revision: 1.37 $"
 
 /*
  * This file holds definitions relevent to the wait system call.
@@ -37,7 +33,7 @@ extern "C" {
  * a process terminates if any are outstanding, and never returns
  * detailed information about process resource utilization.
  */
-#if _SGIAPI
+#if !defined(_POSIX_SOURCE) && !defined(_XOPEN_SOURCE)
 
 /*
  * Structure of the information in the first word returned by both
@@ -88,43 +84,24 @@ typedef union wait	{
 #define w_stopsig	w_S.w_Stopsig
 
 #define _WAITCAST(w)	(*(union wait *)&(w))	/* for 4.0 compat */
-#undef _W_INT
 #define _W_INT(w)	(*(int *)&(w))  /* convert union wait to int */
 #else
 #define _W_INT(i)	(i)
-#endif /* _SGIAPI */
+#endif /* !defined(_POSIX_SOURCE) && !defined(_XOPEN_SOURCE) */
+#define	_WSTOPPED	0177	/* value of s.stopval if process is stopped */
 
 /*
- * POSIX90 additions
- */
-/*
- * Option bits for wait3/waitpid/waitid.  WNOHANG causes the
+ * Option bits for the second argument of wait3.  WNOHANG causes the
  * wait to not hang if there are no stopped or terminated processes, rather
  * returning an error indication in this case (pid==0).  WUNTRACED
  * indicates that the caller should receive status about untraced children
  * which stop due to signals.  If children are stopped and a wait without
  * this option is done, it is as though they were still running... nothing
  * about them is returned.
- *
- * Alas, XPG defines these in stdlib.h also ..
  */
-#if !defined(WUNTRACED)
-#define	WUNTRACED	0004
 #define WNOHANG		0100	
-#define	_WSTOPPED	0177	/* value of s.stopval if process is stopped */
-#define WIFEXITED(stat)         ((_W_INT(stat)&0377)==0)
-#define WIFSIGNALED(stat)       ((_W_INT(stat)&0377)>0&&((_W_INT(stat)>>8)&0377)==0)
-#define WIFSTOPPED(stat)        ((_W_INT(stat)&0377)==_WSTOPPED&&((_W_INT(stat)>>8)&0377)!=0)
 
-#define WEXITSTATUS(stat)	((_W_INT(stat)>>8)&0377)
-#define WTERMSIG(stat)		(_W_INT(stat)&0177)
-#define WSTOPSIG(stat)		((_W_INT(stat)>>8)&0377)
-#endif /* !WUNTRACED */
-
-#if _XOPEN4UX || _XOPEN5
-/*
- * XPG4 lets us use any W[A-Z] name!
- */
+#if !defined(_POSIX_SOURCE)
 #define WEXITED         0001    
 #define WTRAPPED        0002   
 #define WSTOPPED        0004    /* wait for processes stopped by signals */
@@ -136,28 +113,39 @@ typedef union wait	{
 #define WSTOPFLG                0177
 #define WCONTFLG                0177777
 #define WCOREFLAG               0200
-#define WCOREFLG                0200
 #define WSIGMASK                0177
 
 #define WWORD(stat)             (_W_INT(stat)&0177777)
 #define WIFCONTINUED(stat)	(WWORD(stat)==WCONTFLG)
 #define WCOREDUMP(stat)		(_W_INT(stat) & WCOREFLAG)
-#endif /* _XOPEN4UX || _XOPEN5 */
+#endif /* !defined(_POSIX_SOURCE) */
+
+#define	WUNTRACED	0004	 /* for POSIX */
+
+#define WIFEXITED(stat)         ((_W_INT(stat)&0377)==0)
+#define WIFSIGNALED(stat)       ((_W_INT(stat)&0377)>0&&((_W_INT(stat)>>8)&0377)==0)
+#define WIFSTOPPED(stat)        ((_W_INT(stat)&0377)==_WSTOPPED&&((_W_INT(stat)>>8)&0377)!=0)
+
+#define WEXITSTATUS(stat)	((_W_INT(stat)>>8)&0377)
+#define WTERMSIG(stat)		(_W_INT(stat)&0177)
+#define WSTOPSIG(stat)		((_W_INT(stat)>>8)&0377)
 
 #include <sys/types.h>
 
-#if _XOPEN4UX || _XOPEN5
+#ifndef _POSIX_SOURCE
 #include <sys/procset.h>	/* for idtype_t */
 #include <sys/signal.h>		/* siginfo.h needs it */
 #include <sys/siginfo.h>	
 #include <sys/resource.h>	
-#endif /* _XOPEN4UX || _XOPEN5 */
+#endif /* _POSIX_SOURCE */
 
 #ifdef _KERNEL
 union rval;
 extern int waitsys(idtype_t, id_t, k_siginfo_t *, int, struct rusage *,
                    union rval *);
 #else /* _KERNEL */
+
+#ifdef _MODERN_C
 
 extern pid_t waitpid(pid_t, int *, int);
 
@@ -168,14 +156,25 @@ extern int wait();
 extern pid_t wait(int *);
 #endif
 
-#if _XOPEN4UX || _XOPEN5
+#if !defined(_POSIX_SOURCE) && !defined(_XOPEN_SOURCE) 
 #ifdef _BSD_COMPAT
 extern int wait3();
 #else
 extern pid_t wait3(int *, int, struct rusage *);
 #endif
 extern int waitid(idtype_t, id_t, siginfo_t *, int);
-#endif /* _XOPEN4UX || _XOPEN5 */
+#endif /* !defined(_POSIX_SOURCE) && !defined(_XOPEN_SOURCE) */
+
+#else 	/* _MODERN_C */
+
+extern pid_t waitpid();
+extern pid_t wait();
+#if !defined(_POSIX_SOURCE) && !defined(_XOPEN_SOURCE) 
+extern int wait3();
+extern int waitid();
+#endif /* !defined(_POSIX_SOURCE) && !defined(_XOPEN_SOURCE) */
+
+#endif 	/* _MODERN_C */
 
 #endif /* _KERNEL */
 

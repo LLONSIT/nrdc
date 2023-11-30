@@ -14,7 +14,7 @@
  * |         Sunnyvale, California 94088-3650, USA             |
  * |-----------------------------------------------------------|
  */
-/* $Header: /isms/cmplrs.src/v7.4/include/RCS/sym64.h,v 1.3 1993/06/08 01:20:43 bettina Exp $ */
+/* $Header: /hosts/bonnie/proj/irix6.4-ssg/isms/cmplrs/include/RCS/sym64.h,v 1.3 1993/06/08 01:20:43 bettina Exp $ */
 #ifndef __SYM_H__
 #define __SYM_H__
 

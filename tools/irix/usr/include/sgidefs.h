@@ -16,7 +16,7 @@
 extern "C" {
 #endif
 
-#ident "$Revision: 1.11 $"
+#ident "$Revision: 1.5 $"
 
 /*
  * sgidefs.h - SGI/MIPS basic software generation system constants & types
@@ -73,38 +73,27 @@ extern "C" {
 
 /*
  * Compilation Environments
- *	The compiler can offer a set of different compilation environments.
- *	Each one will pre-define the above defines appropriately.
- * 	If you use the _MIPS_* defines, you should include this header file.
- * 	In order to avoid problems when sgidefs.h is not included, the driver
- * 	predefines _MIPS_ISA and _MIPS_SIM to be the actual values (1-4) 
- *	rather than the _MIPS_* names (otherwise, if sgidefs.h is not 
- *	included, we would be defining _MIPS_SIM to be an undefined value).
- * 
- * The following #if conditions will be true in each environment:
- * 	The MIPS ABI (-o32) environment:
- * 	_MIPS_ISA == _MIPS_ISA_MIPS1 or _MIPS_ISA_MIPS2
- *	_MIPS_SIM == _MIPS_SIM_ABI32
- *	_MIPS_FPSET == 16
- *	_MIPS_SZINT == 32
- *	_MIPS_SZLONG == 32
- *	_MIPS_SZPTR == 32
+ *	various compilers may offer a set of different compilation environments
+ *	each one will pre-define the above defines appropriately.
+ * The MIPS ABI environment will pre-define the following:
+ *	(cc -systype=XXX)
  *
- * 	The new MIPS 32-bit ABI (-n32) environment:
- * 	_MIPS_ISA == _MIPS_ISA_MIPS3 or _MIPS_ISA_MIPS4
- *	_MIPS_SIM == _MIPS_SIM_NABI32
- *	_MIPS_FPSET == 32
- *	_MIPS_SZINT == 32
- *	_MIPS_SZLONG == 32
- *	_MIPS_SZPTR == 32
+ *	-D_MIPS_FPSET=16 -D_MIPS_ISA=_MIPS_ISA_MIPS1
+ *	-D_MIPS_SIM=_MIPS_SIM_ABI32 -D_MIPS_SZINT=32
+ *	-D_MIPS_SZLONG=32 -D_MIPS_SZPTR=32
  *
- * 	The MIPS 64-bit ABI (-64) environment:
- * 	_MIPS_ISA == _MIPS_ISA_MIPS3 or _MIPS_ISA_MIPS4
- *	_MIPS_SIM == _MIPS_SIM_ABI64
- *	_MIPS_FPSET == 32
- *	_MIPS_SZINT == 32
- *	_MIPS_SZLONG == 64
- *	_MIPS_SZPTR == 64 
+ * The new MIPS 32-bit ABI environment will pre-define the following
+ *	(cc -systype=XXX)
+ *	-D_MIPS_FPSET=32 -D_MIPS_ISA=_MIPS_ISA_MIPS3
+ *	-D_MIPS_SIM=_MIPS_SIM_NABI32 -D_MIPS_SZINT=32
+ *	-D_MIPS_SZLONG=32 -D_MIPS_SZPTR=32
+ *
+ * The MIPS 64 bit environment will pre-define the following
+ *	(cc -systype=XXX)
+ *	-D_MIPS_FPSET=32 -D_MIPS_ISA=_MIPS_ISA_MIPS3
+ *	-D_MIPS_SIM=_MIPS_SIM_ABI64 -D_MIPS_SZINT=32
+ *	-D_MIPS_SZLONG=64 -D_MIPS_SZPTR=64
+ *
  */
 
 /*
@@ -143,74 +132,22 @@ typedef unsigned long __uint64_t;
 
 #else
 
-/*
- *	64-bit integer types
- *
- *  (1)	In Irix6.1, the compiler implements a new internal type
- *	called  __long_long.   It's purpose is to allow SGI to
- *	define  __int64_t  and __uint64_t  without using
- *	long long or structs or unions.  
- *
- *	The reason for this is that several types in Irix are
- *	being (or will be) promoted to 64-bit integers and will
- *	be typedef'd as either __int64_t  or __uint64_t.  If
- *	these types are defined using  long long, then ANSI 
- *	requires the C compiler to complain because long long
- *	is not standard conforming.  If these types are defined
- *	using a struct or a union, then the programmer can not
- *	use them in arithmetic statements.  The solution we
- *	adopted was to create a new internal type,  __long_long,
- *	that is a synonym for  long long, but whose use does
- *	not violate ANSI rules.
- *
- *	NOTE:	__long_long should not be used anyplace other than
- *		in this header file.  All other 64-bit integer
- *		types should be defined in terms of __int64_t 
- *		or __uint64_t.
- *
- *	
- *  (2)	The reason for the messy set of defines that follow is
- *	that some compilers (old CFRONT, and cc68k) do not
- *	use __long_long.  Therefore, we allow each to choose
- *	which of the following three definitions of 64-bit ints
- *	they want to use:
- *		1.	long long
- *		2.	__long_long
- *		3.	struct { ... }
- */
 #if defined(_LONGLONG)
-	/*  Its alright to use long long in definitions  */
+
 typedef long long __int64_t;
 typedef unsigned long long  __uint64_t;
 
 #else
-#if (defined(__cplusplus) && !defined(__EDG)) || defined(m68000)
-	/*  old cfront and cc68k can handle neither 
-	 *  long long nor __long_long, so we must use
-	 *  a structure definition
-	 */
-typedef union {
-	struct {	
-		int hi32;
-		int lo32;
-	} hilo;
-	double align;		/* to force 64-bit alignment */
+
+typedef struct {
+        int hi32;
+        int lo32;
 } __int64_t;
-typedef union {
-	struct {
-		unsigned int hi32;
-		unsigned int lo32;
-	} hilo;
-	double align;		/* to force 64-bit alignment */
+typedef struct {
+        unsigned int hi32;
+        unsigned int lo32;
 } __uint64_t;
 
-#else
-
-/* __long_long is a hidden builtin, ansi-compliant 64-bit type */
-typedef __long_long __int64_t;
-typedef unsigned __long_long __uint64_t;
-
-#endif /* __cplusplus */
 #endif /* _LONGLONG */
 
 #endif /* _MIPS_SZLONG */

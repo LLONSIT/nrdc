@@ -18,11 +18,11 @@
 #ifndef __MALLOC_H__
 #define __MALLOC_H__
 
-#ident "$Revision: 1.44 $"
-#include <standards.h>
-#include <internal/sgimacros.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-__SGI_LIBC_BEGIN_EXTERN_C
+#ident "$Revision: 1.35 $"
 
 /* Definitions for malloc(3X) and amalloc(3P) routines */
 
@@ -34,6 +34,7 @@ __SGI_LIBC_BEGIN_EXTERN_C
 #define M_KEEP		4	/* retain contents of block after a free until
 				 * another allocation */
 
+#if defined (_SGI_SOURCE)
 #define M_BLKSZ		5	/* minimum amount of memory by which to
 				 * grow when sbrk'ing more memory */
 #define M_MXCHK		6	/* maximum number of blocks to check before
@@ -54,6 +55,7 @@ __SGI_LIBC_BEGIN_EXTERN_C
 #define MEM_SHARED	0x0001	/* region is shared and should be
 				 * protected with locks */
 #define MEM_NOAUTOGROW	0x0004	/* arena is not an autogrow area */
+#endif /* SGI_SOURCE */
 
 #if (defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS))
 #include <sgidefs.h>
@@ -73,23 +75,46 @@ struct mallinfo  {
 	__scint_t keepcost;	/* cost of enabling keep option */
 };
 
-#if _SGIAPI
-/*
- * Locking macro for mallocs
- * ALL malloc replacements must provide for single threading.
- *
- * The underlying malloc lock is automatically initialized when
- * a process does an initial sproc(2).
- */
+#if defined (_SGI_SOURCE)
 #include <ulocks.h>
 
-extern int __us_rsthread_malloc;
-extern int __libc_lockmalloc(void);
-extern int __libc_unlockmalloc(void);
-#define __LOCK_MALLOC()	__us_rsthread_malloc ?  __libc_lockmalloc() : 1
-#define __UNLOCK_MALLOC() __us_rsthread_malloc ?  __libc_unlockmalloc() : 0
+/* Logging data structures */
 
-#endif	/* _SGIAPI */
+/* logging entry types */
+enum malloc_log_type {
+	malloc_log_malloc,
+	malloc_log_realloc,
+	malloc_log_free
+};
+
+/* log file entry.  One entry per operation that was logged. */
+struct malloc_log_entry  {
+	enum malloc_log_type type;
+	void* address;			/* address */
+	size_t size;			/* size of malloc/realloc */
+	void* oldaddress;		/* for realloc only */
+	unsigned int numpcs;		/* number of pcs that follow */
+	char* pcs[1];			/* 0 or more pcs */
+};
+
+/*
+ * Locking macro for mallocs
+ * ALL malloc replacements must provide for single threading
+ * The __mmalloclock is automatically initialized whenever a process
+ * does an sproc(2)
+ * Note that us* are macros so they don't name-space pollute
+ */
+extern int __us_rsthread_malloc;
+extern ulock_t __mmalloclock;
+#ifdef _ABI_SOURCE
+#define __LOCK_MALLOC()		1
+#define __UNLOCK_MALLOC()	0
+#else
+#define __LOCK_MALLOC()	__us_rsthread_malloc ?  ussetlock(__mmalloclock) : 1
+#define __UNLOCK_MALLOC() __us_rsthread_malloc ?  usunsetlock(__mmalloclock) : 0
+#endif
+
+#endif /* SGI_SOURCE */
 
 extern void *		calloc(size_t, size_t);
 extern void *		malloc(size_t);
@@ -98,6 +123,7 @@ extern void *		realloc(void *, size_t);
 extern int		mallopt(int, int);
 extern struct mallinfo	mallinfo(void);
 
+#if defined (_SGI_SOURCE)
 /* additional libmalloc entry points */
 extern void		*recalloc(void *, size_t, size_t);
 extern size_t		mallocblksize(void *);
@@ -116,7 +142,10 @@ extern int		amallopt(int, int, void *);
 extern void		adelete(void *);
 extern size_t		amallocblksize(void *, void *);
 extern void		*amemalign(size_t, size_t, void *);
+#endif /* SGI_SOURCE */
 
 #endif /* (_LANGUAGE_C || _LANGUAGE_C_PLUS_PLUS) */
-__SGI_LIBC_END_EXTERN_C
+#ifdef __cplusplus
+}
+#endif
 #endif /* !__MALLOC_H__ */

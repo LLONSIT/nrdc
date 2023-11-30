@@ -1,1 +1,0 @@
-../dmedia/sir_disk.h

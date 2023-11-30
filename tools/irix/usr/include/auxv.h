@@ -12,7 +12,7 @@
 #ident	"@(#)uts-3b2:proc/auxv.h	1.2"
 
 #ifdef __cplusplus
-extern "C" {
+}
 #endif
 
 

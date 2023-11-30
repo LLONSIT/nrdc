@@ -64,7 +64,7 @@ extern "C" {
 typedef struct {
 	unsigned char	e_ident[EI_NIDENT];	/* ident bytes */
 	Elf32_Half	e_type;			/* file type */
-	Elf32_Half	e_machine;		/* target machine and OS */
+	Elf32_Half	e_machine;		/* target machine */
 	Elf32_Word	e_version;		/* file version */
 	Elf32_Addr	e_entry;		/* start address */
 	Elf32_Off	e_phoff;		/* phdr file offset */
@@ -106,35 +106,23 @@ typedef struct {
 #define ELFCLASSNONE	0		/* EI_CLASS */
 #define ELFCLASS32	1
 #define ELFCLASS64	2
-#define ELFCLASSNUM	3  /* Number of ELFCLASS*, not a real EI_CLASS. */
-			   /* ELFCLASSNUM is one greater than the highest
-			   ** EI_CLASS value, not an EI_CLASS entry.
-			   */
+#define ELFCLASSNUM	3
 
 #define ELFDATANONE	0		/* EI_DATA */
 #define ELFDATA2LSB	1
 #define ELFDATA2MSB	2
-#define ELFDATANUM	3  /* Number of ELFDATA*, not a real EI_DATA. */
-			   /* ELFDATANUM is one greater than the highest
-			   ** EI_DATA value, not an EI_DATA entry.
-			   */
+#define ELFDATANUM	3
 
 #define ET_NONE		0		/* e_type */
 #define ET_REL		1
 #define ET_EXEC		2
 #define ET_DYN		3
 #define ET_CORE		4
-#define ET_NUM		5  /* Number of e_types, not an e_type. */
-			   /* ET_NUM must be one greater than the 
-			   ** highest e_type.
-			   */
+#define ET_NUM		5
 
 #define	ET_LOPROC	0xff00		/* processor specific range */
 #define	ET_HIPROC	0xffff
 
-/*
- *	e_machine
- */
 #define EM_NONE		0		/* e_machine */
 #define EM_M32		1		/* AT&T WE 32100 */
 #define EM_SPARC	2		/* Sun SPARC */
@@ -145,25 +133,12 @@ typedef struct {
 #define EM_860		7		/* Intel i860 */
 #define	EM_MIPS		8		/* Mips R2000 */
 #define	EM_S370		9		/* Amdhal	*/
+#define EM_NUM		10
 
-#define	EM_XIA64	10		/* Experimental IA64 objects
-					 * used only by the simulator.
-					 */
-#define EM_IA_64        50              /* Intel Itanium */
-
-#define EM_NUM		51 /* Number of e_machine entries, not */
-			   /* an actual e_machine entry. */
-			   /* EM_NUM must be one greater than the 
-			   ** highest e_machine value.
-			   */
 
 #define EV_NONE		0		/* e_version, EI_VERSION */
 #define EV_CURRENT	1
-#define EV_NUM		2  /* Number of version entries, not */
-			   /* an actual version. */
-			   /* EV_NUM must be one greater than the 
-			   ** highest e_version value.
-			   */
+#define EV_NUM		2
 
 
 /*	Program header
@@ -189,11 +164,7 @@ typedef struct {
 #define PT_NOTE		4
 #define PT_SHLIB	5
 #define PT_PHDR		6
-#define PT_NUM		7 	/* Number of p_type s, not an actual */
-				/* p_type. */
-			   	/* PT_NUM must be one greater than the 
-			   	** highest p_type value.
-			   	*/
+#define PT_NUM		7
 
 #define PT_LOPROC	0x70000000	/* processor specific range */
 #define PT_HIPROC	0x7fffffff
@@ -235,11 +206,7 @@ typedef struct {
 #define SHT_REL		9
 #define SHT_SHLIB	10
 #define SHT_DYNSYM	11
-#define SHT_NUM		12 	/* Number of sh_types, not an actual */
-				/* sh_type. */
-			   	/* SHT_NUM must be one greater than the 
-			   	** highest sh_type value.
-			   	*/
+#define SHT_NUM		12
 #define SHT_LOUSER	0x80000000
 #define SHT_HIUSER	0xffffffff
 
@@ -275,7 +242,6 @@ typedef struct {
 #define ELF_MSYM	".msym"
 #define ELF_FINI	".fini"
 #define ELF_GOT		".got"
-#define ELF_PLT		".plt"
 #define ELF_HASH	".hash"
 #define ELF_INIT	".init"
 #define ELF_REL_DATA	".rel.data"
@@ -331,10 +297,7 @@ typedef struct {
 #define STB_LOCAL	0		/* BIND */
 #define STB_GLOBAL	1
 #define STB_WEAK	2
-#define STB_NUM		3 /* Number of STB_ entries, not a binding. */
-			  /* STB_NUM must be one greater than the 
-			  ** highest  actual STB_* binding.
-			  */
+#define STB_NUM		3
 
     /* WARNING: new defines go into <sys/elf.h> */
 
@@ -346,10 +309,7 @@ typedef struct {
 #define STT_FUNC	2
 #define STT_SECTION	3
 #define STT_FILE	4
-#define STT_NUM		5 /* Number of STT entries, not a type. */
-			  /* STT_NUM must be one greater than the 
-			  ** highest  actual STT_* type.
-			  */
+#define STT_NUM		5
 
 #define STT_LOPROC	13		/* processor specific range */
 #define STT_HIPROC	15
@@ -384,10 +344,6 @@ typedef struct {
 #define ELF32_R_SYM(info)	((info)>>8)
 #define ELF32_R_TYPE(info)	((unsigned char)(info))
 #define ELF32_R_INFO(sym,type)	(((sym)<<8)+(unsigned char)(type))
-
-/*  Relocation type common to all Irix binaries	*/
-#define R_IRIX_NONE	0
-
 #endif
 
 #if (defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS))
@@ -399,16 +355,7 @@ typedef struct {
     } d_un;
 } Elf32_Dyn;
 #endif
-/*  GOT is Global Offset Table
-    PLT is Procedure Linkage Table.
-    The Procedure Linkage Table (used with, for example,
-	the ATT 3B2 computer) entries are in an area of
-	the program text called the GOT stubs area (.MIPS.stubs)
-	in a MIPS binary.  The MIPS ABI does not have a .plt 
-	(Procedure Linkage Table) section, though the GOT stubs 
-	perform  a function very like that of the 
-	ATT 3B2 Procedure Linkage Table.
-*/
+
 #define DT_NULL		0
 #define DT_NEEDED	1
 #define DT_PLTRELSZ	2

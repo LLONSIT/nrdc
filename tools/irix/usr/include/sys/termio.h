@@ -7,7 +7,6 @@
 #ifndef _SYS_TERMIO_H
 #define _SYS_TERMIO_H
 
-#include <standards.h>
 #include <sys/termios.h>
 
 /* all the ioctl codes and flags are now in termios.h */
@@ -26,40 +25,12 @@
 #define	CRPRNT	CTRL('r')
 #define	CDSUSP	CTRL('y')	/* delayed job-control (not implemented yet) */
 
-#define __OLD_SSPEED __OLD_B9600
-#define __NEW_SSPEED __NEW_B9600
 #define	SSPEED	B9600
 
 /*
  * Ioctl control packet
- * We retain both versions so that the kernel can use both,
- * e.g. when converting from one to the other.
  */
 struct termio {
-	tcflag_t	c_iflag;	/* input modes */
-	tcflag_t	c_oflag;	/* output modes */
-	tcflag_t	c_cflag;	/* control modes */
-	tcflag_t	c_lflag;	/* line discipline modes */
-#if !defined(_OLD_TERMIOS) && _NO_ABIAPI
-	speed_t		c_ospeed;	/* output speed */
-	speed_t		c_ispeed;	/* input speed - not supported */
-#endif
-	char		c_line;		/* line discipline */
-	cc_t		c_cc[NCCS];	/* control chars */
-};
-
-struct __new_termio {
-	tcflag_t	c_iflag;	/* input modes */
-	tcflag_t	c_oflag;	/* output modes */
-	tcflag_t	c_cflag;	/* control modes */
-	tcflag_t	c_lflag;	/* line discipline modes */
-	speed_t		c_ospeed;	/* output speed */
-	speed_t		c_ispeed;	/* input speed - not supported */
-	char		c_line;		/* line discipline */
-	cc_t		c_cc[NCCS];	/* control chars */
-};
-
-struct __old_termio {
 	tcflag_t	c_iflag;	/* input modes */
 	tcflag_t	c_oflag;	/* output modes */
 	tcflag_t	c_cflag;	/* control modes */
@@ -95,13 +66,6 @@ struct __old_termio {
  * structure of ioctl arg for LDGETT and LDSETT
  *	This structure is no longer used.
  */
-#undef st_flgs
-#undef st_termt
-#undef st_crow
-#undef st_ccol
-#undef st_vrow
-#undef st_lrow
-
 struct	termcb	{
 	char	st_flgs;	/* term flags */
 	char	st_termt;	/* term type */

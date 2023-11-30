@@ -2,10 +2,10 @@
  * ====================================================================
  *
  * Module: elfaccess.h
- * $Revision: 1.4 $
- * $Date: 1998/01/26 20:53:53 $
- * $Author: mpm $
- * $Source: /isms/cmplrs.src/v7.4/include/RCS/elfaccess.h,v $
+ * $Revision: 1.3 $
+ * $Date: 1996/04/17 15:37:03 $
+ * $Author: lesniak $
+ * $Source: /hosts/bonnie/proj/irix6.4-ssg/isms/cmplrs/include/RCS/elfaccess.h,v $
  *
  * Revision history:
  *  03-Jun-93 - Original Version
@@ -98,5 +98,43 @@
 #define Set_REL_info	Set_REL32_info
 
 #endif
+
+
+/* ====================================================================
+ *
+ * .contents Section
+ *
+ * ====================================================================
+ */
+
+/* Field access: */
+#define	      CON32_extn(c)	((c).con_y.con_info & __CON32_EMASK)
+#define	  Set_CON32_extn(c)	((c).con_y.con_info |= __CON32_EMASK)
+#define	      CON64_extn(c)	((c).con_y.con_info & __CON64_EMASK)
+#define	  Set_CON64_extn(c)	((c).con_y.con_info |= __CON64_EMASK)
+
+#define	      CON32_kind(c)	ELF32_CON_KIND(c)
+#define	  Set_CON32_kind(c,v) \
+        ((c).con_y.con_info = ((c).con_y.con_info & ~__CON32_KMASK) | (v<<__CON32_KSHIFT))
+#define	      CON64_kind(c)	ELF64_CON_KIND(c)
+#define	  Set_CON64_kind(c,v) \
+        ((c).con_y.con_info = ((c).con_y.con_info & ~__CON64_KMASK) | (v<<__CON64_KSHIFT))
+
+#define	      CON32_length(c)	ELF32_CON_LENGTH(c)
+#define   Set_CON32_length(c,v) \
+        ((c).con_y.con_info = ((c).con_y.con_info & ~__CON32_LMASK) | (v&__CON32_LMASK))
+#define	      CON64_length(c)	ELF64_CON_LENGTH(c)
+#define   Set_CON64_length(c,v) \
+        ((c).con_y.con_info = ((c).con_y.con_info & ~__CON64_LMASK) | (v&__CON64_LMASK))
+
+#define       CON_start(c)	((c).con_y.con_start)
+#define       CON32_start(c)	CON_start(c)
+#define       CON32_start(c)	CON_start(c)
+
+/* NOTE:  The Set_CONxx_xval macros also set the extension flag. */
+#define	      CON32_xval(c)	ELF32_CON_XVAL(c)
+#define	  Set_CON32_xval(c,v)	((c).con_xval |= (v|__CON32_EMASK))
+#define	      CON64_xval(c)	ELF64_CON_XVAL(c)
+#define	  Set_CON64_xval(c,v)	((c).con_xval |= (v|__CON64_EMASK))
 
 #endif /* elfaccess_INCLUDED */

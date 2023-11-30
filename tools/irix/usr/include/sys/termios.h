@@ -6,7 +6,7 @@
 /*	actual or intended publication of such source code.	*/
 
 /*
- * $Revision: 1.29 $
+ * $Revision: 1.16 $
  */
 
 #ifndef _SYS_TERMIOS_H
@@ -15,7 +15,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include <standards.h>
+
 #include <sys/ttydev.h>
 #include <sys/types.h>
 
@@ -23,13 +23,13 @@ extern "C" {
 #define _POSIX_VDISABLE 0 /* Disable special character functions */
 #endif
 
-#if (_NO_POSIX && _NO_XOPEN4 && _NO_XOPEN5) || _ABIAPI
+#ifndef _POSIX_SOURCE 
 #define	CTRL(c)	((c)&037)
 #define IBSHIFT 16
 
 /* required by termio.h and VCEOF/VCEOL */
 #define	NCC	8
-#endif /* (_NO_POSIX && _NO_XOPEN4 && _NO_XOPEN5) || _ABIAPI  */
+#endif /* !defined(_POSIX_SOURCE) */ 
 
 #define NCCS	23
 
@@ -55,88 +55,23 @@ typedef __uint32_t speed_t;
 
 /*
  * Ioctl control packet
- * We retain both versions so that the kernel can use both,
- * e.g. when converting from one to the other.
  */
 struct termios {
 	tcflag_t	c_iflag;	/* input modes */
 	tcflag_t	c_oflag;	/* output modes */
 	tcflag_t	c_cflag;	/* control modes */
 	tcflag_t	c_lflag;	/* line discipline modes */
-#if !defined(_OLD_TERMIOS) && _NO_ABIAPI
-	speed_t		c_ospeed;	/* output speed */
-	speed_t		c_ispeed;	/* input speed - not supported */
-#endif
 	cc_t		c_cc[NCCS];	/* control chars */
 };
-
-struct __new_termios {
-	tcflag_t	c_iflag;	/* input modes */
-	tcflag_t	c_oflag;	/* output modes */
-	tcflag_t	c_cflag;	/* control modes */
-	tcflag_t	c_lflag;	/* line discipline modes */
-	speed_t		c_ospeed;	/* output speed */
-	speed_t		c_ispeed;	/* input speed - not supported */
-	cc_t		c_cc[NCCS];	/* control chars */
-};
-
-struct __old_termios {
-	tcflag_t	c_iflag;	/* input modes */
-	tcflag_t	c_oflag;	/* output modes */
-	tcflag_t	c_cflag;	/* control modes */
-	tcflag_t	c_lflag;	/* line discipline modes */
-	cc_t		c_cc[NCCS];	/* control chars */
-};
-
-#define __NEW_MAX_BAUD 500000
 
 /* 
  * POSIX termios functions
  * These functions get mapped into ioctls.
- * Both the old and new versions exist in libc.  Old apps
- * that haven't been recompiled, and apps that are
- * recompiled and define _OLD_TERMIOS, use the
- * old routines.  Recompiled apps use the new routines by default
- * (except MIPS ABI).
  */
 
 #ifndef _KERNEL
 
-#if !defined(_OLD_TERMIOS) && _NO_ABIAPI
-
-extern speed_t __new_cfgetospeed (const struct termios *);
-extern int __new_cfsetospeed (struct termios *, speed_t);
-extern speed_t __new_cfgetispeed (const struct termios *);
-extern int __new_cfsetispeed (struct termios *, speed_t);
-extern int __new_tcgetattr (int, struct termios *);
-extern int __new_tcsetattr (int, int, const struct termios *);
-
-/*REFERENCED*/
-static speed_t cfgetospeed (const struct termios *__t) { 
-    return __new_cfgetospeed(__t);
-}
-/*REFERENCED*/
-static int cfsetospeed (struct termios *__t, speed_t __s) { 
-    return __new_cfsetospeed(__t,__s);
-}
-/*REFERENCED*/
-static speed_t cfgetispeed (const struct termios *__t) { 
-    return __new_cfgetispeed(__t);
-}
-/*REFERENCED*/
-static int cfsetispeed (struct termios *__t, speed_t __s) { 
-    return __new_cfsetispeed(__t,__s);
-}
-/*REFERENCED*/
-static int tcgetattr (int __fd, struct termios *__t) { 
-    return __new_tcgetattr(__fd,__t);
-}
-/*REFERENCED*/
-static int tcsetattr (int __fd, int __act, const struct termios *__t) { 
-    return __new_tcsetattr(__fd, __act, __t);
-}
-
-#else /* _OLD_TERMIOS || _ABIAPI */
+#ifdef _MODERN_C
 
 extern speed_t cfgetospeed (const struct termios *);
 extern int cfsetospeed (struct termios *, speed_t);
@@ -144,18 +79,35 @@ extern speed_t cfgetispeed (const struct termios *);
 extern int cfsetispeed (struct termios *, speed_t);
 extern int tcgetattr (int, struct termios *);
 extern int tcsetattr (int, int, const struct termios *);
-
-#endif /* _OLD_TERMIOS || _ABIAPI */
-
 extern int tcsendbreak (int, int);
 extern int tcdrain (int);
 extern int tcflush (int, int);
 extern int tcflow (int, int);
 
+#else
 
-#if _XOPEN4UX || _XOPEN5
+extern speed_t cfgetospeed ();
+extern int cfsetospeed ();
+extern speed_t cfgetispeed ();
+extern int cfsetispeed ();
+extern int tcgetattr ();
+extern int tcsetattr ();
+extern int tcsendbreak ();
+extern int tcdrain ();
+extern int tcflush ();
+extern int tcflow ();
+
+#endif /* _MODERN_C */
+
+#ifndef _POSIX_SOURCE 
+
+#ifdef _MODERN_C
 extern pid_t tcgetsid (int);
-#endif
+#else
+extern pid_t tcgetsid ();
+#endif /* _MODERN_C */
+
+#endif /* !defined(_POSIX_SOURCE) */ 
 
 #endif /* !defined(_KERNEL) */
 
@@ -167,13 +119,18 @@ extern pid_t tcgetsid (int);
 #define	VKILL	3
 #define	VEOF	4
 #define	VEOL	5
+#ifndef _POSIX_SOURCE 
 #define	VEOL2	6
+#endif /* !defined(_POSIX_SOURCE) */ 
 #define	VMIN	4
 #define	VTIME	5
+#ifndef _POSIX_SOURCE 
 #define	VSWTCH	7
+#endif /* !defined(_POSIX_SOURCE) */ 
 #define VSTART	8
 #define VSTOP	9
 #define	VSUSP   10
+#ifndef _POSIX_SOURCE 
 #define	VDSUSP	 11
 #define	VREPRINT 12
 #define	VDISCARD 13
@@ -186,7 +143,6 @@ extern pid_t tcgetsid (int);
 /*
  * control characters from Xenix termio.h
  */
-#if (_NO_POSIX && _NO_XOPEN4 && _NO_XOPEN5) || _ABIAPI
 #define	VCEOF	NCC		/* RESERVED true EOF char (V7 compatability) */
 #define	VCEOL	(NCC + 1)	/* RESERVED true EOL char */
 
@@ -220,7 +176,7 @@ extern pid_t tcgetsid (int);
 #define	CDSUSP	CTRL('y')	/* delayed job-control */
 #define CBRK	0377		/* SGI 4.3BSD compatibility */
 
-#endif /* (_NO_POSIX && _NO_XOPEN4 && _NO_XOPEN5) || _ABIAPI */
+#endif /* !defined(_POSIX_SOURCE) */ 
 
 
 /* === input modes (c_iflag) === */
@@ -234,17 +190,23 @@ extern pid_t tcgetsid (int);
 #define	INLCR	0000100
 #define	IGNCR	0000200
 #define	ICRNL	0000400
+#if !defined(_POSIX_SOURCE) || defined(_XOPEN_SOURCE) 
 #define	IUCLC	0001000
+#endif /* !defined(_POSIX_SOURCE) || defined(_XOPEN_SOURCE) */ 
 #define	IXON	0002000
+#if !defined(_POSIX_SOURCE) || defined(_XOPEN_SOURCE) 
 #define	IXANY	0004000
+#endif /* !defined(_POSIX_SOURCE) || defined(_XOPEN_SOURCE) */ 
 #define	IXOFF	0010000
+#ifndef _POSIX_SOURCE 
 #define IMAXBEL 0020000
 #define	IBLKMD	0040000	
+#endif /* !defined(_POSIX_SOURCE) */ 
 
 /* === output modes (c_oflag) === */
 
 #define	OPOST	0000001
-#if _XOPEN4 || _XOPEN5
+#if !defined(_POSIX_SOURCE) || defined(_XOPEN_SOURCE) 
 #define	OLCUC	0000002
 #define	ONLCR	0000004
 #define	OCRNL	0000010
@@ -265,11 +227,11 @@ extern pid_t tcgetsid (int);
 #define	TAB1	0004000
 #define	TAB2	0010000
 #define	TAB3	0014000
-#endif /* _XOPEN4 || _XOPEN5 */
-#if (_NO_POSIX && _NO_XOPEN4 && _NO_XOPEN5) || _ABIAPI
+#endif /* !defined(_POSIX_SOURCE) || defined(_XOPEN_SOURCE) */ 
+#ifndef _POSIX_SOURCE 
 #define XTABS	0014000
-#endif /* _NO_POSIX && _NO_XOPEN && _NO_XOPEN54 || _ABIAPI */
-#if _XOPEN4 || _XOPEN5
+#endif /* !defined(_POSIX_SOURCE) */ 
+#if !defined(_POSIX_SOURCE) || defined(_XOPEN_SOURCE) 
 #define	BSDLY	0020000
 #define	BS0	0
 #define	BS1	0020000
@@ -279,15 +241,15 @@ extern pid_t tcgetsid (int);
 #define	FFDLY	0100000
 #define	FF0	0
 #define	FF1	0100000
-#endif /* _XOPEN4 || _XOPEN5 */
-#if (_NO_POSIX && _NO_XOPEN4 && _NO_XOPEN5) || _ABIAPI
+#endif /* !defined(_POSIX_SOURCE) || defined(_XOPEN_SOURCE) */ 
+#ifndef _POSIX_SOURCE 
 #define PAGEOUT 0200000
 #define WRAP	0400000
 
 /* === control modes (c_cflag) === */
 
 #define	CBAUD		000000017
-#endif /* (_NO_POSIX && _NO_XOPEN4 && _NO_XOPEN5) || _ABIAPI */
+#endif /* !defined(_POSIX_SOURCE) */ 
 #define	CSIZE		000000060
 #define	CS5		0
 #define	CS6		000000020
@@ -299,7 +261,7 @@ extern pid_t tcgetsid (int);
 #define	PARODD		000001000
 #define	HUPCL		000002000
 #define	CLOCAL		000004000
-#if (_NO_POSIX && _NO_XOPEN4 && _NO_XOPEN5) || _ABIAPI
+#ifndef _POSIX_SOURCE 
 #define RCV1EN		000010000
 #define XMT1EN		000020000
 #define	LOBLK		000040000
@@ -307,15 +269,15 @@ extern pid_t tcgetsid (int);
 #define CIBAUD		003600000
 #define PAREXT		004000000
 #define CNEW_RTSCTS	010000000 /* RiscOS API compliance. */
-#endif /* (_NO_POSIX && _NO_XOPEN4 && _NO_XOPEN5) || _ABIAPI */
+#endif /* !defined(_POSIX_SOURCE) */ 
 
 /* === line discipline 0 (a.k.a. local) modes (c_lflag) === */
 
 #define	ISIG	0000001
 #define	ICANON	0000002
-#if _XOPEN4 || _XOPEN5
+#if !defined(_POSIX_SOURCE) || defined(_XOPEN_SOURCE) 
 #define	XCASE	0000004
-#endif /* _XOPEN4 ||_XOPEN5 */
+#endif /* !defined(_POSIX_SOURCE) || defined(_XOPEN_SOURCE) */ 
 #define	ECHO	0000010
 #define	ECHOE	0000020
 #define	ECHOK	0000040
@@ -325,37 +287,22 @@ extern pid_t tcgetsid (int);
 #define ITOSTOP  0100000
 #define TOSTOP  ITOSTOP
 
-#if (_NO_POSIX && _NO_XOPEN4 && _NO_XOPEN5) || _ABIAPI
+#ifndef _POSIX_SOURCE
 #define	ECHOCTL	0001000
 #define	ECHOPRT	0002000
 #define	ECHOKE	0004000
 #define	DEFECHO	0010000
 #define	FLUSHO	0020000
 #define	PENDIN	0040000
+#endif /* !defined(_POSIX_SOURCE) */ 
 
-
+#ifndef _POSIX_SOURCE 
 #define	TIOC	('T'<<8)
 
-#define	__NEW_TCGETA	(TIOC|201)
-#define	__NEW_TCSETA	(TIOC|202)
-#define	__NEW_TCSETAW	(TIOC|203)
-#define	__NEW_TCSETAF	(TIOC|204)
-#define	__OLD_TCGETA	(TIOC|1)
-#define	__OLD_TCSETA	(TIOC|2)
-#define	__OLD_TCSETAW	(TIOC|3)
-#define	__OLD_TCSETAF	(TIOC|4)
-
-#if !defined(_OLD_TERMIOS) && _NO_ABIAPI
-#define	TCGETA	__NEW_TCGETA
-#define	TCSETA	__NEW_TCSETA
-#define	TCSETAW __NEW_TCSETAW
-#define	TCSETAF __NEW_TCSETAF
-#else /* _OLD_TERMIOS || _ABIAPI */
-#define	TCGETA	__OLD_TCGETA
-#define	TCSETA	__OLD_TCSETA
-#define	TCSETAW __OLD_TCSETAW
-#define	TCSETAF __OLD_TCSETAF
-#endif /* _OLD_TERMIOS || _ABIAPI */
+#define	TCGETA	(TIOC|1)
+#define	TCSETA	(TIOC|2)
+#define	TCSETAW (TIOC|3)
+#define	TCSETAF (TIOC|4)
 
 #define	TCSBRK	(TIOC|5)
 #define	TCXONC	(TIOC|6)
@@ -401,26 +348,11 @@ extern pid_t tcgetsid (int);
 
 /* termios ioctls */
 
-#define __NEW_TCGETS		(TIOC|213)
-#define __NEW_TCSETS		(TIOC|214)
-#define __NEW_TCSETSW		(TIOC|215)
-#define	__NEW_TCSETSF		(TIOC|216)
-#define __OLD_TCGETS		(TIOC|13)
-#define __OLD_TCSETS		(TIOC|14)
-#define __OLD_TCSETSW		(TIOC|15)
-#define	__OLD_TCSETSF		(TIOC|16)
-#if !defined(_OLD_TERMIOS) && _NO_ABIAPI
-#define TCGETS		__NEW_TCGETS
-#define TCSETS		__NEW_TCSETS
-#define TCSETSW		__NEW_TCSETSW
-#define	TCSETSF		__NEW_TCSETSF
-#else /* _OLD_TERMIOS || _ABIAPI */
-#define TCGETS		__OLD_TCGETS
-#define TCSETS		__OLD_TCSETS
-#define TCSETSW		__OLD_TCSETSW
-#define	TCSETSF		__OLD_TCSETSF
-#endif /* _OLD_TERMIOS || _ABIAPI */
-#endif /* (_NO_POSIX && _NO_XOPEN4 && _NO_XOPEN5) || _ABIAPI */
+#define TCGETS		(TIOC|13)
+#define TCSETS		(TIOC|14)
+#define TCSETSW		(TIOC|15)
+#define	TCSETSF		(TIOC|16)
+#endif /* !defined(_POSIX_SOURCE) */ 
 
 #define TCSANOW		(('T'<<8)|14)	/* same as TCSETS  */
 #define TCSADRAIN	(('T'<<8)|15)	/* same as TCSETSW */
@@ -439,9 +371,9 @@ extern pid_t tcgetsid (int);
 
 /* TIOC ioctls for BSD, ptys, job control and modem control */
 
-#if _NO_POSIX && _NO_XOPEN4 && _NO_XOPEN5
+#ifndef _POSIX_SOURCE 
 #define	tIOC	('t'<<8)
-#endif /* _NO_POSIX && _NO_XOPEN4 && _NO_XOPEN5 */
+#endif /* !defined(_POSIX_SOURCE) */ 
 
 
 /* Slots for 386/XENIX compatibility */
@@ -449,7 +381,7 @@ extern pid_t tcgetsid (int);
 
 #ifndef _SYS_TTOLD_H
 
-#if _NO_POSIX && _NO_XOPEN4 && _NO_XOPEN5
+#ifndef _POSIX_SOURCE 
 #define TIOCGETD	(tIOC|0)
 #define TIOCSETD	(tIOC|1)
 #define TIOCHPCL	(tIOC|2)
@@ -479,13 +411,13 @@ extern pid_t tcgetsid (int);
 #define	TIOCOUTQ	(tIOC|115)	/* driver output queue size */
 #define	TIOCSTOP	(tIOC|111)	/* stop output, like ^S */
 #define	TIOCSTART	(tIOC|110)	/* start output, like ^Q */
-#endif /* _NO_POSIX && _NO_XOPEN4 && _NO_XOPEN5 */
+#endif /* !defined(_POSIX_SOURCE) */ 
 
 #endif /* end _SYS_TTOLD_H */
 
 /* POSIX job control ioctls */
 
-#if _NO_POSIX && _NO_XOPEN4 && _NO_XOPEN5
+#ifndef _POSIX_SOURCE 
 #define	TIOCGSID	(tIOC|22)	/* get session id on ctty*/
 #define	TIOCSSID	(tIOC|24)	/* set session id on ctty*/
 
@@ -509,10 +441,7 @@ extern pid_t tcgetsid (int);
 /* pseudo-tty */
 
 #define	TIOCREMOTE	(tIOC|30)	/* remote input editing */
-#ifdef __notdef__
-/* this is not currently supported */
 #define TIOCSIGNAL	(tIOC|31)	/* pty: send signal to slave */
-#endif
 
 /*
  * SVR4 compatability pty ioctl commands
@@ -551,12 +480,12 @@ extern pid_t tcgetsid (int);
  * are characters in the input queue.
  */
 #define FIORDCHK        (('f'<<8)|3)            /* V7 */
-#endif /* _NO_POSIX && _NO_XOPEN4 && _NO_XOPEN5 */
+#endif /* !defined(_POSIX_SOURCE) */ 
 
 #ifndef _SYS_TTOLD_H
 #ifndef _SYS_PTEM_H
 
-#if _NO_POSIX && _NO_XOPEN4 && _NO_XOPEN5
+#ifndef _POSIX_SOURCE 
 /* Windowing structure to support JWINSIZE/TIOCSWINSZ/TIOCGWINSZ */
 struct winsize {
 	unsigned short ws_row;       /* rows, in characters*/
@@ -564,7 +493,7 @@ struct winsize {
 	unsigned short ws_xpixel;    /* horizontal size, pixels */
 	unsigned short ws_ypixel;    /* vertical size, pixels */
 };
-#endif /* _NO_POSIX && _NO_XOPEN4 && _NO_XOPEN5 */
+#endif /* !defined(_POSIX_SOURCE) */ 
 
 #endif /* end _SYS_PTEM_H */
 #endif /* end _SYS_TTOLD_H */

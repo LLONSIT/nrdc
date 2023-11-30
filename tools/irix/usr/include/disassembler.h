@@ -16,7 +16,7 @@
  * |         Sunnyvale, California 94088-3650, USA             |
  * |-----------------------------------------------------------|
  */
-/* $Header: /isms/cmplrs.src/v7.4/include/RCS/disassembler.h,v 7.7 1996/04/25 23:00:55 zaineb Exp $ */
+/* $Header: /hosts/bonnie/proj/irix6.4-ssg/isms/cmplrs/include/RCS/disassembler.h,v 7.7 1996/04/25 23:00:55 zaineb Exp $ */
 
 /* Disassembler package */
 

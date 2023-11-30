@@ -7,104 +7,71 @@
 
 #ifndef _SYS_STAT_H
 #define _SYS_STAT_H
-#ident	"$Revision: 3.64 $"
+#ident	"$Revision: 3.34 $"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include <standards.h>
-#include <sys/types.h>
-#include <sys/timespec.h>
 
-#if _SGIAPI || _ABIAPI
-/*
- * Historic Unix has sys/time.h being included here. XPG really doesn't
- * want it included. Alas, many programs assume struct timeval is available
- * when simply including this file...
- */
 #include <sys/time.h>
-#endif
 
-#define _ST_FSTYPSZ	16	/* array size for file system type name */
-#define	_ST_PAD1SZ	3	/* num longs in st_pad1 */
-#define	_ST_PAD2SZ	2	/* num longs in st_pad2 */
-#define	_ST_PAD4SZ	7	/* num longs in st_pad3 */
+#define _ST_FSTYPSZ 16		/* array size for file system type name */
 
 /*
  * stat structure, used by stat(2) and fstat(2)
  */
+
 struct	stat {
 	dev_t	st_dev;
-	long	st_pad1[_ST_PAD1SZ];	/* reserved for network id */
+	long	st_pad1[3];	/* reserved for network id */
 	ino_t	st_ino;
 	mode_t	st_mode;
 	nlink_t st_nlink;
 	uid_t 	st_uid;
 	gid_t 	st_gid;
 	dev_t	st_rdev;
-	long	st_pad2[_ST_PAD2SZ];	/* dev and off_t expansion */
+	long	st_pad2[2];	/* dev and off_t expansion */
 	off_t	st_size;
 	long	st_pad3;	/* future off_t expansion */
-	timespec_t st_atim;	
-	timespec_t st_mtim;	
-	timespec_t st_ctim;	
+	timestruc_t st_atim;	
+	timestruc_t st_mtim;	
+	timestruc_t st_ctim;	
 	long	st_blksize;
-#if (_KERNEL || _SGIAPI || _XOPEN5)
-	blkcnt_t st_blocks;
-#elif (_MIPS_SIM == _ABIN32)
-#define	_ST_BLOCKS_HACK
-	union {
-		blkcnt_t	__st_blocks_ll;
-		struct {
-			long	__st_blocks_high;
-			long	__st_blocks_low;
-		} __st_blocks_s;
-	} __st_blocks_u;
-#define	st_blocks	__st_blocks_u.__st_blocks_s.__st_blocks_low
-#else
 	long	st_blocks;
-#endif
 	char	st_fstype[_ST_FSTYPSZ];
-	long	st_projid;
-	long	st_pad4[_ST_PAD4SZ];	/* expansion area */
+	long	st_pad4[8];	/* expansion area */
 };
 
-#if _LFAPI
+
+#if defined(_SGI_SOURCE) && !defined(_POSIX_SOURCE) && !defined(_XOPEN_SOURCE)
 /*
  * Stat structure used by stat64(2), fstat64(2), and lstat64(2).
  */
 struct	stat64 {
 	dev_t	st_dev;
-	long	st_pad1[_ST_PAD1SZ];	/* reserved for network id */
+	long	st_pad1[3];	/* reserved for network id */
 	ino64_t	st_ino;
 	mode_t	st_mode;
 	nlink_t st_nlink;
 	uid_t 	st_uid;
 	gid_t 	st_gid;
 	dev_t	st_rdev;
-	long	st_pad2[_ST_PAD2SZ];	/* dev and off_t expansion */
+	long	st_pad2[2];	/* dev and off_t expansion */
 	off64_t	st_size;
 	long	st_pad3;	/* future off_t expansion */
-	timespec_t st_atim;	
-	timespec_t st_mtim;	
-	timespec_t st_ctim;	
+	timestruc_t st_atim;	
+	timestruc_t st_mtim;	
+	timestruc_t st_ctim;	
 	long	st_blksize;
-	blkcnt64_t st_blocks;
+	long long	st_blocks;
 	char	st_fstype[_ST_FSTYPSZ];
-	long	st_projid;
-	long	st_pad4[_ST_PAD4SZ];	/* expansion area */
+	long	st_pad4[8];	/* expansion area */
 };
-#endif /* _LFAPI */
+#endif
 
-#ifdef tv_sec
-#define st_atime	st_atim.__tv_sec
-#define st_mtime	st_mtim.__tv_sec
-#define st_ctime	st_ctim.__tv_sec
-#else
 #define st_atime	st_atim.tv_sec
 #define st_mtime	st_mtim.tv_sec
 #define st_ctime	st_ctim.tv_sec
-#endif
 
 /* MODE MASKS */
 
@@ -115,9 +82,6 @@ struct	stat64 {
 #define	S_IFIFO		0x1000	/* fifo */
 #define	S_IFCHR		0x2000	/* character special */
 #define	S_IFDIR		0x4000	/* directory */
-/*
- * The Xenix constructs are not supported by IRIX.
- */
 #define	S_IFNAM		0x5000  /* XENIX special named file */
 #define		S_INSEM 0x1	/* XENIX semaphore subtype of IFNAM */
 #define		S_INSHD 0x2	/* XENIX shared data subtype of IFNAM */
@@ -127,10 +91,8 @@ struct	stat64 {
 #define	S_IFLNK		0xA000	/* symbolic link */
 #define	S_IFSOCK	0xC000	/* socket */
 
-#ifndef S_ISUID
 #define	S_ISUID		0x800	/* set user id on execution */
 #define	S_ISGID		0x400	/* set group id on execution */
-#endif	/* S_ISUID */
 
 #define	S_ISVTX		0x200	/* save swapped text even after use */
 
@@ -141,7 +103,6 @@ struct	stat64 {
 
 /* the following macros are for POSIX conformance */
 
-#ifndef S_IRWXU
 #define	S_IRWXU	00700		/* read, write, execute: owner */
 #define	S_IRUSR	00400		/* read permission: owner */
 #define	S_IWUSR	00200		/* write permission: owner */
@@ -154,7 +115,7 @@ struct	stat64 {
 #define	S_IROTH	00004		/* read permission: other */
 #define	S_IWOTH	00002		/* write permission: other */
 #define	S_IXOTH	00001		/* execute permission: other */
-#endif	/* S_IRWXU */
+
 
 #define S_ISFIFO(mode)	((mode&S_IFMT) == S_IFIFO)
 #define S_ISCHR(mode)	((mode&S_IFMT) == S_IFCHR)
@@ -164,15 +125,6 @@ struct	stat64 {
 #define S_ISLNK(m)      (((m) & S_IFMT) == S_IFLNK)
 #define S_ISSOCK(m)     (((m) & S_IFMT) == S_IFSOCK)
 
-#if _POSIX93 || _XOPEN5
-/*
- * The following macros do not yet do anything as they refer to
- * POSIX options that are not yet implemented
- */
-#define S_TYPEISMQ(buf)		(0)
-#define S_TYPEISSEM(buf)	(0)
-#define S_TYPEISSHM(buf) 	(0)
-#endif
 
 /* a version number is included in the SVR4 stat and mknod interfaces. */
 
@@ -183,109 +135,101 @@ struct	stat64 {
 #define	_STAT64_VER 3		/* [lf]stat64 system calls */	
 
 #if !defined(_KERNEL)
+#if defined(_MODERN_C)
 
 int _fxstat(const int, int, struct stat *);
 int _xstat(const int, const char *, struct stat *);
+#if !defined(_POSIX_SOURCE) 
 int _lxstat(const int, const char *, struct stat *);
 int _xmknod(const int, const char *, mode_t, dev_t);
-
-#if _XOPEN4UX || _XOPEN5
 int fchmod(int, mode_t);
-#endif	/* _XOPEN4UX || _XOPEN5 */
-
+#endif /* !defined(_POSIX_SOURCE) */
 extern int chmod(const char *, mode_t);
 extern int mkdir(const char *, mode_t);
 extern int mkfifo(const char *, mode_t);
 extern mode_t umask(mode_t);
 
-#if _ABIAPI
+#if defined(_ABI_SOURCE)
+
+static int fstat(int, struct stat *);
+static int stat(const char *, struct stat *);
+#if !defined(_POSIX_SOURCE) 
+static int lstat(const char *, struct stat *);
+static int mknod(const char *, mode_t, dev_t);
+#endif /* !defined(_POSIX_SOURCE) */
 /*
- * ABI versions are required to call _xxx
- *
- *
  * NOTE: Application software should NOT program
  * to the _xstat interface.
  */
-/* REFERENCED */
+
 static int
-stat(const char *__path, struct stat *__buf)
+stat(const char *path, struct stat *buf)
 {
-	return _xstat(_STAT_VER, __path, __buf);
+int ret;
+        ret = _xstat(_STAT_VER, path, buf);
+        return ret;
 }
-/* REFERENCED */
 static int
-fstat(int __fd, struct stat *__buf)
+fstat(int fd, struct stat *buf)
 {
-        return _fxstat(_STAT_VER, __fd, __buf);
+int ret;
+        ret = _fxstat(_STAT_VER, fd, buf);
+        return ret;
 }
 
-#if _XOPEN4UX || _XOPEN5
-/* REFERENCED */
+#if !defined(_POSIX_SOURCE)
 static int
-lstat(const char *__path, struct stat *__buf)
+lstat(const char *path, struct stat *buf)
 {
-        return _lxstat(_STAT_VER, __path, __buf);
+int ret;
+        ret = _lxstat(_STAT_VER, path, buf);
+        return ret;
 }
 
-/* REFERENCED */
 static int
-mknod(const char *__path, mode_t __mode, dev_t __dev)
+mknod(const char *path, mode_t mode, dev_t dev)
 {
-        return _xmknod(_MKNOD_VER, __path, __mode, __dev);
+int ret;
+        ret = _xmknod(_MKNOD_VER, path, mode, dev);
+        return ret;
 }
-#endif /* _XOPEN4UX || _XOPEN5 */
+#endif /* !defined(_POSIX_SOURCE) */
 
-#elif defined(_ST_BLOCKS_HACK)
-#undef _ST_BLOCKS_HACK
-#define _EOVERFLOW	79		/* see EOVERFLOW from errno.h */
-#define	_LONG_MAX	2147483647L	/* N32 so long is 32 bits */
-/* REFERENCED */
-static int
-stat(const char *__path, struct stat *__buf)
-{
-	int __i = _xstat(_STAT_VER, __path, __buf);
-	if (__i == 0 && (__buf->__st_blocks_u.__st_blocks_ll > _LONG_MAX))
-		return _EOVERFLOW;
-	return __i;
-}
-/* REFERENCED */
-static int
-fstat(int __fd, struct stat *__buf)
-{
-        int __i = _fxstat(_STAT_VER, __fd, __buf);
-	if (__i == 0 && (__buf->__st_blocks_u.__st_blocks_ll > _LONG_MAX))
-		return _EOVERFLOW;
-	return __i;
-}
-#if _XOPEN4UX || _XOPEN5
-/* REFERENCED */
-static int
-lstat(const char *__path, struct stat *__buf)
-{
-        int __i = _lxstat(_STAT_VER, __path, __buf);
-	if (__i == 0 && (__buf->__st_blocks_u.__st_blocks_ll > _LONG_MAX))
-		return _EOVERFLOW;
-	return __i;
-}
-int mknod(const char *, mode_t, dev_t);
-#endif /* _XOPEN4UX || _XOPEN5 */
-
-#else /* !_ABIAPI && !_ST_BLOCKS_HACK */
+#else /* _ABI_SOURCE */
 
 int fstat(int, struct stat *);
 int stat(const char *, struct stat *);
-#if _XOPEN4UX || _XOPEN5
+#if !defined(_POSIX_SOURCE) 
 int lstat(const char *, struct stat *);
 int mknod(const char *, mode_t, dev_t);
-#endif /* _XOPEN4UX || _XOPEN5 */
-#endif /* _ABIAPI, _ST_BLOCKS_HACK */
 
-#if _LFAPI
+#if defined(_SGI_SOURCE) && !defined(_POSIX_SOURCE) && !defined(_XOPEN_SOURCE)
 int fstat64(int, struct stat64 *);
 int lstat64(const char *, struct stat64 *);
 int stat64(const char *, struct stat64 *);
 #endif
 
+#endif /* !defined(POSIX_SOURCE) */
+
+#endif /* _ABI_SOURCE */
+
+#else	/* !_MODERN_C */
+
+extern int fstat(), stat();
+extern int mknod(), lstat();
+
+extern int _fxstat(), _xstat();
+extern int _xmknod(), _lxstat();
+extern int chmod();
+extern int mkdir();
+extern int mkfifo();
+extern mode_t umask();
+
+#if defined(_SGI_SOURCE) && !defined(_POSIX_SOURCE) && !defined(_XOPEN_SOURCE)
+extern int fstat64(), lstat64(), stat64();
+#endif
+
+#endif /* defined(_MODERN_C) */
 #endif /* !defined(_KERNEL) */
 
 #if defined(_KERNEL)

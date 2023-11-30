@@ -22,7 +22,7 @@ extern "C" {
 #endif
 
 #ifdef _INCLUDE_ID
-static char *excpt_h_id="$Header: /isms/cmplrs.src/v7.4/include/RCS/excpt.h,v 1.4 1992/10/14 17:31:00 ho Exp $";
+static char *excpt_h_id="$Header: /hosts/bonnie/proj/irix6.4-ssg/isms/cmplrs/include/RCS/excpt.h,v 1.4 1992/10/14 17:31:00 ho Exp $";
 #endif
 
 /* 

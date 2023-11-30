@@ -14,7 +14,7 @@
  * |         Sunnyvale, California 94088-3650, USA             |
  * |-----------------------------------------------------------|
  */
-/* $Header: /isms/cmplrs.src/v7.4/include/RCS/scnhdr.h,v 7.13 1994/06/23 20:45:56 ho Exp $ */
+/* $Header: /hosts/bonnie/proj/irix6.4-ssg/isms/cmplrs/include/RCS/scnhdr.h,v 7.13 1994/06/23 20:45:56 ho Exp $ */
 #ifndef __SCNHDR_H__
 #define __SCNHDR_H__
 

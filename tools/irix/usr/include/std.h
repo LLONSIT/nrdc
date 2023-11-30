@@ -1,5 +1,8 @@
 #ifndef __STD_H__
 #define __STD_H__
+#ifdef __cplusplus
+extern "C" {
+#endif
 /*
  * std.h
  *
@@ -20,7 +23,7 @@
  * rights reserved under the Copyright Laws of the United States.
  */
 
-#ident "$Revision: 1.4 $"
+#ident "$Revision: 1.3 $"
 
 /*
  *	@(#) std.h 1.1 88/03/30 inccmd:std.h
@@ -41,4 +44,7 @@
 #define	MULKSHIFT	10
 
 #define	SYSTOMUL(sysblk)	((sysblk) * (SYSBSIZE / MULBSIZE))
+#ifdef __cplusplus
+}
+#endif
 #endif /* !__STD_H__ */

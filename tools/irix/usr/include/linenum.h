@@ -14,7 +14,7 @@
  * |         Sunnyvale, California 94088-3650, USA             |
  * |-----------------------------------------------------------|
  */
-/* $Header: /isms/cmplrs.src/v7.4/include/RCS/linenum.h,v 7.6 1993/06/08 01:15:47 bettina Exp $ */
+/* $Header: /hosts/bonnie/proj/irix6.4-ssg/isms/cmplrs/include/RCS/linenum.h,v 7.6 1993/06/08 01:15:47 bettina Exp $ */
 
 /*	Copyright (c) 1984 AT&T	*/
 /*	  All Rights Reserved  	*/

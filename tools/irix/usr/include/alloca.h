@@ -2,7 +2,7 @@
 /* | Copyright (c) 1986, 1989 MIPS Computer Systems, Inc.  | */
 /* | All Rights Reserved.                                  | */
 /* --------------------------------------------------------- */
-/* $Header: /isms/cmplrs.src/v7.4/include/RCS/alloca.h,v 7.9 1993/07/17 01:51:32 rdahl Exp $ */
+/* $Header: /hosts/bonnie/proj/irix6.4-ssg/isms/cmplrs/include/RCS/alloca.h,v 7.9 1993/07/17 01:51:32 rdahl Exp $ */
 #ifndef __ALLOCA_H
 #define __ALLOCA_H
 

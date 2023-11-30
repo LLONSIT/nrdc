@@ -1,5 +1,5 @@
 /*
- * Copyright 1990-1995 Silicon Graphics, Inc.
+ * Copyright 1990,1992 Silicon Graphics, Inc.
  * All Rights Reserved.
  *
  * This is UNPUBLISHED PROPRIETARY SOURCE CODE of Silicon Graphics, Inc.;
@@ -24,11 +24,9 @@
 #ifndef _SYS_TYPES_H
 #define _SYS_TYPES_H
 
-#ident	"$Revision: 3.148 $"
+#ident	"$Revision: 3.70 $"
 
-#include <standards.h>
 #include <sgidefs.h>
-#include <internal/sgimacros.h>
 
 /* POSIX Extensions */
 typedef unsigned char   uchar_t;
@@ -36,47 +34,14 @@ typedef unsigned short  ushort_t;
 typedef unsigned int    uint_t;
 typedef unsigned long   ulong_t;
 
-/* POSIX Threads */
-#if (_POSIX1C || _XOPEN5)
-#include <sys/pthread.h>
-#endif /* _POSIX1C */
-
-#if _XOPEN5 || _XOPEN4
-typedef long blksize_t;
-typedef long suseconds_t;
-
-#if (_MIPS_SZLONG == 32)
-typedef	long	xtiscalar_t;
-typedef	unsigned long	xtiuscalar_t;
-#endif
-#if (_MIPS_SZLONG == 64)
-typedef	int	xtiscalar_t;
-typedef	unsigned int	xtiuscalar_t;
-#endif
-
-typedef xtiscalar_t t_scalar_t;
-typedef xtiuscalar_t t_uscalar_t;
-#endif /* _XOPEN5 */
-
 /* Primarily Kernel types */
 typedef	char *		addr_t;		/* ?<core address> type */
 typedef	char *		caddr_t;	/* ?<core address> type */
-#if (_MIPS_SIM == _ABIN32)
-typedef	__int64_t	daddr_t;	/* <disk address> type */
-#else
 typedef	long		daddr_t;	/* <disk address> type */
-#endif
 typedef	long		pgno_t;		/* virtual page number type */
 typedef	__uint32_t	pfn_t;		/* physical page number type */
-typedef	short		cnt_t;		/* <count> type */
-typedef unsigned long	basictime_t;
-typedef __int64_t	micro_t;
-/* The "page count" types can be restricted to 32-bits since that
- * is sufficient to support 44 bit addressing (4K pages) or 46 bit addressing
- * (with 16K pages).
- */
-typedef __int32_t	pgcnt_t;	/* page count type */
-#if _NO_POSIX && _NO_XOPEN4 && _NO_XOPEN5
+typedef	short		cnt_t;		/* ?<count> type */
+#if !defined(_POSIX_SOURCE)
 typedef enum { B_FALSE, B_TRUE } boolean_t;
 #endif
 
@@ -96,7 +61,7 @@ typedef long			id_t;	/* A process id,	*/
 					/* user id, or group id.*/
 #endif
 #if (_MIPS_SZLONG == 64)
-typedef __int32_t		id_t;
+typedef __uint32_t		id_t;
 #endif
 
 /* Typedefs for dev_t components */
@@ -109,6 +74,13 @@ typedef ulong_t	minor_t;	/* minor part of device number */
 typedef __uint32_t major_t;	/* major part of device number */
 typedef __uint32_t minor_t;	/* minor part of device number */
 #endif
+
+/* Universally Unique Identifiers */
+
+typedef struct {
+        unsigned char	u_bits[16];
+} uuid_t, *uuid_p_t;
+
 
 /*
  * For compatilbility reasons the following typedefs (prefixed o_) 
@@ -136,6 +108,7 @@ typedef	long		uid_t;
 typedef	long		gid_t;
 typedef unsigned long	nlink_t;	/* used for link counts */
 typedef long		pid_t;		/* proc & grp IDs  */
+typedef	unsigned long	ino_t;		/* <inode> type */
 #endif
 #if (_MIPS_SZLONG == 64)
 typedef	__uint32_t	mode_t;		/* file attrs */
@@ -144,88 +117,32 @@ typedef	__int32_t	uid_t;
 typedef	__int32_t	gid_t;
 typedef __uint32_t	nlink_t;	/* used for link counts */
 typedef __int32_t	pid_t;		/* proc & grp IDs  */
+typedef	__uint32_t	ino_t;		/* <inode> type */
 #endif
 
-typedef int tid_t;                      /* thread IDs */
-
-typedef dev_t	vertex_hdl_t;		/* hardware graph vertex handle */
-
-#if (defined(_KERNEL) || (_MIPS_SIM == _ABIN32)) && !defined(_STANDALONE)
-typedef	__uint64_t	ino_t;		/* <inode> type */
-#else
-typedef	unsigned long	ino_t;		/* <inode> type */
-#endif
 typedef __uint64_t	ino64_t;	/* bit inode number type */
 
-#ifndef _OFF_T
-#define _OFF_T
-#if defined(_KERNEL) && !defined(_STANDALONE)
+#if !defined(_KERNEL) || defined(_STANDALONE)
+typedef	long		off_t;		/* byte offset type */
+#else	/* !_KERNEL || _STANDALONE */
 typedef __int64_t	off_t;		/* byte offset type */
-#elif defined(_STANDALONE)
-typedef long		off_t;		/* byte offset type */
-#elif _MIPS_SIM == _ABIN32
-typedef __int64_t	off_t;		/* byte offset type */
-#else
-typedef long		off_t;		/* byte offset type */
-#endif
-#endif /* OFF_T */
-
-#ifndef _OFF64_T
-#define _OFF64_T
+#endif	/* !_KERNEL || _STANDALONE */
 typedef	__int64_t	off64_t;	/* big byte offset type */
-#endif	/* !_OFF64_T */
 
 typedef __scint_t	__scoff_t;	/* scaling off_t */
-#if defined(_KERNEL) || (_NO_XOPEN4 && _NO_XOPEN5 && _NO_POSIX)
+#if defined(_KERNEL) || ( !defined(_XOPEN_SOURCE) && !defined(_POSIX_SOURCE) )
 typedef __scoff_t	scoff_t;	/* kernel scaling off_t */
-#endif
+#endif /* defined(_KERNEL) || ( !defined(_XOPEN_SOURCE) && !defined(_POSIX_SOURCE) ) */
 
-#if _LFAPI
-	/* additions for Large File Access */
-typedef	__int64_t	blkcnt64_t;
-typedef	__uint64_t	fsblkcnt64_t;
-typedef	__uint64_t	fsfilcnt64_t;
-#endif /* _LFAPI */
-
-#if ((_MIPS_SIM == _ABIN32) || defined(_KERNEL))
-typedef	__int64_t	blkcnt_t;	/* blocks in a file */
-typedef	__uint64_t	fsblkcnt_t;	/* blocks in a filesystem */
-typedef	__uint64_t	fsfilcnt_t;	/* files in a filesystem */
-#else
-typedef	long		blkcnt_t;	/* blocks in a file */
-typedef	ulong_t		fsblkcnt_t;	/* blocks in a filesystem */
-typedef	ulong_t		fsfilcnt_t;	/* files in a filesystem */
-#endif
 
 typedef	long		swblk_t;
 typedef	unsigned long	paddr_t;	/* <physical address> type */
-typedef	unsigned long	iopaddr_t;	/* <I/O physical address> type */
 typedef	int		key_t;		/* IPC key type */
 typedef	unsigned char	use_t;		/* use count for swap.  */
-typedef	long		sysid_t;
+typedef	short		sysid_t;
 typedef	short		index_t;
-
-typedef signed short	nasid_t;        /* node id in numa-as-id space */
-typedef signed short	cnodeid_t;	/* node id in compact-id space */
-typedef	signed char  	partid_t;	/* partition ID type */
-typedef signed short 	moduleid_t;	/* user-visible module number type */
-typedef signed short 	cmoduleid_t;	/* kernel compact module id type */
-typedef	uchar_t		clusterid_t;	/* Clusterid of the cell */
-
-typedef unsigned int 	lock_t;		/* <spinlock> type for splock{spl} */
-typedef	signed short	cpuid_t;	/* cpuid */
-typedef	unsigned char	pri_t;		/* sheduler priority */
-typedef __uint64_t	accum_t;	/* accounting accumulator */
-typedef __int64_t	prid_t;		/* project ID */
-typedef __int64_t	ash_t;		/* array session handle */
-typedef short		cell_t;		/* cell ID */
-typedef int		credid_t;	/* credential id */
-typedef __int64_t	jid_t;		/* job ID */
-
-typedef __int32_t	ncpus_t;
-typedef	__uint64_t	id_type_t;
-
-__SGI_LIBC_BEGIN_NAMESPACE_STD
+typedef unsigned int	lock_t;		/* <spinlock> type */
+typedef	signed char	cpuid_t;	/* cpuid */
 
 #if !defined(_SIZE_T) && !defined(_SIZE_T_)
 #define _SIZE_T
@@ -237,9 +154,6 @@ typedef unsigned long size_t;
 #endif
 #endif /* !_SIZE_T */
 
-__SGI_LIBC_END_NAMESPACE_STD
-__SGI_LIBC_USING_FROM_STD(size_t)
-
 #ifndef _SSIZE_T
 #define _SSIZE_T
 #if (_MIPS_SZLONG == 32)
@@ -250,59 +164,16 @@ typedef long    ssize_t;
 #endif
 #endif
 
-__SGI_LIBC_BEGIN_NAMESPACE_STD
-
 #ifndef _TIME_T
 #define _TIME_T
-#if _MIPS_SZLONG == 32
 typedef	long		time_t;		/* <time> type */
-#endif
-#if _MIPS_SZLONG == 64
-typedef	int		time_t;		/* <time> type */
-#endif
 #endif /* !_TIME_T */
 
 #ifndef _CLOCK_T
 #define _CLOCK_T
-#if _MIPS_SZLONG == 32
 typedef	long		clock_t; /* relative time in a specified resolution */
-#endif
-#if _MIPS_SZLONG == 64
-typedef	int		clock_t; /* relative time in a specified resolution */
-#endif
 #endif	/* !_CLOCK_T */
 
-__SGI_LIBC_END_NAMESPACE_STD
-__SGI_LIBC_USING_FROM_STD(time_t)
-__SGI_LIBC_USING_FROM_STD(clock_t)
-
-#ifndef _WCHAR_T
-#define _WCHAR_T
-#if (_MIPS_SZLONG == 32)
-typedef long wchar_t;
-#endif
-#if (_MIPS_SZLONG == 64)
-typedef __int32_t wchar_t;
-#endif
-#endif
-
-#ifndef _CLOCK_ID_T
-#define _CLOCK_ID_T
-typedef int             clockid_t;
-#endif
-#ifndef _TIMER_T
-#define  _TIMER_T
-typedef int		timer_t;
-#endif
-#ifndef _USECONDS_T
-#define _USECONDS_T
-/*
- *  For X/Open XPG4:	The type useconds_t is an unsigned integral
- *			type capable of storing values at least in
- *			the range zero to 1,000,000.
- */
-typedef	unsigned int	useconds_t;
-#endif
 #if defined(__mips)
 /*
  * To permit types.h to be used for rudimentary cross-compilation -
@@ -337,46 +208,21 @@ typedef __uint32_t fpreg_t;
 typedef __uint64_t fpreg_t;
 #endif
 
-/*
- * inttypes.h also defines these. avoid compiler errors if both inttypes.h
- * and types.h are included.
- */
-
-#ifndef __inttypes_INCLUDED
-#define __inttypes_INCLUDED
-
-typedef signed char             int8_t;
-typedef unsigned char           uint8_t;
-typedef signed short            int16_t;
-typedef unsigned short          uint16_t;
-typedef signed int              int32_t;
-typedef unsigned int            uint32_t;
-typedef __int64_t 		int64_t;
-typedef __uint64_t		uint64_t;
-typedef __int64_t 		intmax_t;
-typedef __uint64_t		uintmax_t;
-typedef signed long int         intptr_t;
-typedef unsigned long int       uintptr_t;
-
-#endif /* !__inttypes_INCLUDED */
-/*
- * alas, these slipped in and are no longer part of inttypes.h but folks
- * have already started using them
- */
+typedef	signed char	int8_t;
+typedef	short		int16_t;
+typedef	__int32_t	int32_t;
 typedef	unsigned char	u_int8_t;
 typedef	unsigned short	u_int16_t;
 typedef	__uint32_t	u_int32_t;
 
-#if defined(_KERNEL) || (_NO_POSIX && _NO_XOPEN4 && _NO_XOPEN5) || _ABIAPI
+#if defined(_KERNEL) || ( !defined(_XOPEN_SOURCE) && !defined(_POSIX_SOURCE) )
 /*
  * The following is the value of type id_t to use to indicate the
  * caller's current id.  See procset.h for the type idtype_t
  * which defines which kind of id is being specified.
  */
 #define	P_MYID	(-1)
-#endif /* KERNEL || NO_POSIX && NO_XOPEN4 && NO_XOPEN5 || ABIAPI */
 
-#if defined(_KERNEL) || ( _NO_POSIX && _NO_XOPEN4 && _NO_XOPEN5 )
 #define NOPID (pid_t)(-1)
 
 #ifndef NODEV
@@ -396,9 +242,9 @@ typedef	long	hostid_t;
  */
 #define	P_MYHOSTID	(-1)
 
-#endif /*  defined(_KERNEL) || ( _NO_POSIX && _NO_XOPEN4 && _NO_XOPEN5 ) */
+#endif /* defined(_KERNEL) || ( !defined(_XOPEN_SOURCE) && !defined(_POSIX_SOURCE) ) */
 
-#if (_NO_POSIX && _NO_XOPEN4 && _NO_XOPEN5) || defined(_BSD_TYPES) || defined(_BSD_COMPAT)
+#if ( !defined(_XOPEN_SOURCE) && !defined(_POSIX_SOURCE) ) || defined(_BSD_TYPES) || defined(_BSD_COMPAT)
 /*
  * Nested include for BSD/sockets source compatibility.
  * (The select macros used to be defined here).
@@ -406,21 +252,13 @@ typedef	long	hostid_t;
 #include <sys/bsd_types.h>
 #endif
 
-#if (_MIPS_SIM != _ABIO32)
-typedef __uint64_t k_sigset_t;	/* signal set type */
-#else
+/*typedef __uint64_t k_sigset_t;*/
 typedef struct {                /* signal set type */
-        __uint32_t __sigbits[2];
+        __uint32_t sigbits[2];
 } k_sigset_t;
-#if _SGIAPI
-#define sigbits __sigbits
-#endif
-#endif
+typedef __uint32_t k_fltset_t;     /* kernel fault set type */
 
 #if defined(_KERNEL) || defined(_STANDALONE) || defined(_KMEMUSER)
-
-typedef __uint32_t k_fltset_t;	/* kernel fault set type */
-
 /*
  * The Kernel must be able to interface between 32 and 64 bit programs
  * at the same time. Thus any user<->kernel interface structures
@@ -455,7 +293,7 @@ typedef __uint64_t app64_ptr_t;
  * syscall arg type - its 32 or 64 bit depending on the compilation mode
  * its either signed or unsigned
  */
-#if _MIPS_SIM == _ABI64
+#if defined(_K64U64)
 typedef __int64_t sysarg_t;
 typedef __uint64_t usysarg_t;
 #else
@@ -463,20 +301,20 @@ typedef int sysarg_t;
 typedef unsigned usysarg_t;
 #endif
 
-/*
- * Type of char pointers passed in by the PROM
- */
-#ifdef _K64PROM32
-typedef __int32_t __promptr_t;
-#else
-typedef char * __promptr_t;
-#endif
-
 /* a cpu machine register - kernel view */
+#if defined(_K32U64) || defined(_K64U64) || defined(_K32US64)
 typedef __uint64_t k_machreg_t;
 typedef __int64_t k_smachreg_t;
+#else
+typedef unsigned k_machreg_t;
+typedef long k_smachreg_t;
+#endif
 
+#if defined(_K64U64) || defined(_K32U64)
 typedef __uint64_t k_fpreg_t;
+#else
+typedef unsigned k_fpreg_t;
+#endif
 
 /*
  * Since device drivers may need to know which ABI the current user process
@@ -495,45 +333,15 @@ typedef struct __userabi {
 /*
  * Internal Kernel types only
  */
-__SGI_LIBC_BEGIN_EXTERN_C
-typedef __uint32_t	sm_swaphandle_t;/* swap manager handle */
+typedef void *		sm_swaphandle_t;/* swap manager handle */
 typedef struct anon *	anon_hdl;	/* anon manager handle */
-typedef	int		 (*pl_t)(void);	/* priority level */
-__SGI_LIBC_END_EXTERN_C
-#if __HARDTYPE
-/* note that the '_opaque' means that the struct never is defined anywhere. */
-typedef struct __uvaddr_opaque *uvaddr_t; /* user process virtual address */
+typedef	int		 (*pl_t)();	/* priority level */
+#ifdef EVEREST
+typedef long long	cpumask_t;	/* bit position == cpuid */
 #else
-typedef char *uvaddr_t;			/* user process virtual address */
+typedef unsigned int	cpumask_t;	/* bit position == cpuid */
 #endif
-typedef uchar_t mprot_t;		/* memory protections (PROT_*) */
-/*
- * The basic handle to an address space given out to local clients
- */
-typedef struct __pasid_opaque *aspasid_t;	/* private AS id */
-typedef struct {
-	struct __as_opaque *as_obj;	/* virtual address space object */
-	aspasid_t as_pasid;		/* private address space id */
-	uint64_t as_gen;		/* generation */
-} asid_t;
-
-/*
- * Structure of probeable-addresses list.
- * This defines non-VME, non KSEG[012] addresses
- * which are probeable (by /dev/kmem et al).
- */
-struct kmem_ioaddr {
-	unsigned long	v_base;
-	unsigned long	v_length;	/* in bytes */
-};
-
-#include <sys/cpumask.h>		/* for definition of cpumask_t */
-#include <sys/nodemask.h>              /* for definition of cnodemask_t */
-
-/* Kernel system thread type */
-typedef void (st_func_t)(void *);
 
 #endif /* _KERNEL || _STANDALONE || _KMEMUSER */
-
 
 #endif /* _SYS_TYPES_H */

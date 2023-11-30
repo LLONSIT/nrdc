@@ -13,7 +13,7 @@
  * |         Sunnyvale, California 94088-3650, USA             |
  * |-----------------------------------------------------------|
  */
-/* $Header: /isms/cmplrs.src/v7.4/include/RCS/ieeefp.h,v 1.8 1997/07/22 21:55:46 vegas Exp $ */
+/* $Header: /hosts/bonnie/proj/irix6.4-ssg/isms/cmplrs/include/RCS/ieeefp.h,v 1.6 1996/08/03 00:57:20 vegas Exp $ */
 /*	Copyright (c) 1988 AT&T	*/
 /*	  All Rights Reserved  	*/
 
@@ -28,10 +28,8 @@
 extern "C" {
 #endif
 
-#include <sgidefs.h>
-
 /*
- * Floating point environment for machines that support
+ * Floating point enviornment for machines that support
  * the IEEE 754 floating-point standard.  This file currently 
  * supports the 3B2 and 80*87 families.
  *
@@ -69,16 +67,19 @@ extern int	unordered( double, double );
 extern fpclass_t fpclass();	/* get class of double value */
 #endif
 
-#if (_MIPS_SIM==_MIPS_SIM_NABI32 || _MIPS_SIM==_MIPS_SIM_ABI64)
+#if (defined(_COMPILER_VERSION) && (_COMPILER_VERSION >= 400))
+
 
 extern fpclass_t fpclassl (long double);
 extern int unorderedl (long double, long double);
 extern int finitel(long double);
 
 #if (defined(__EXTENSIONS__))
+
 #define	qfpclass fpclassl
 #define	qunordered unorderedl
 #define qfinite	finitel
+
 #endif
 
 #endif
@@ -165,6 +166,12 @@ extern int isnand(double);
 extern int isnand();
 #define isnanf(x)	(((*(long *)&(x) & 0x7f800000L)==0x7f800000L)&& \
 			 ((*(long *)&(x) & 0x007fffffL)!=0x00000000L) )
+#endif
+
+#if _COMPILER_VERSION >= 400
+
+extern int isnanq (long double);
+
 #endif
 
 /* EXCEPTION HANDLING ****************************************

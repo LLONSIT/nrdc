@@ -1,8 +1,0 @@
-#ifndef __CERRNO__
-#define __CERRNO__
-#include <internal/errno_core.h>
-#endif /* __CERRNO__ */
-
-// Local Variables:
-// mode:C++
-// End:

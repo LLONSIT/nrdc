@@ -14,7 +14,7 @@
  * |         Sunnyvale, California 94088-3650, USA             |
  * |-----------------------------------------------------------|
  */
-/* $Header: /isms/cmplrs.src/v7.4/include/RCS/obj_type.h,v 7.7 1993/06/09 18:59:18 bettina Exp $ */
+/* $Header: /proj/irix5.3/isms/cmplrs/include/RCS/obj_type.h,v 7.7 1993/06/09 18:59:18 bettina Exp $ */
 
 #ifndef __OBJ_TYPE_H__
 #define __OBJ_TYPE_H__

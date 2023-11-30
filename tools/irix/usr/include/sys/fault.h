@@ -11,7 +11,7 @@
  **************************************************************************/
 #ifndef __SYS_FAULT_H__
 #define __SYS_FAULT_H__
-#ident	"$Revision: 1.3 $"
+#ident	"$Revision: 1.2 $"
 
 #include "sys/types.h"
 /*
@@ -33,7 +33,6 @@
 #define FLTPCINVAL	12	/* invalid PC exception */
 #define FLTWATCH	13	/* user watchpoint */
 #define FLTKWATCH	14	/* kernel watchpoint */
-#define FLTSCWATCH	15	/* hit a store conditional on a watched page */
 
 typedef struct {
 	__uint32_t word[4];

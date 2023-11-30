@@ -26,109 +26,46 @@
 #ifndef _SYS_SELECT_H
 #define _SYS_SELECT_H
 
-#ident	"$Revision: 1.18 $"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include <standards.h>
+#ident	"$Revision: 1.4 $"
 
 /*
- * This is an XPG4 header. It mandates that the fd_set be comprised of
- * signed quantities (it really wants longs).
- * NOTE: must NOT be included in POSIX mode since fd_set isn't a valid
- * POSIX symbol
- */
-
-/*
- * FD_SETSIZE may be defined by the user, since select(2) only reads
- * as many bits as specified by the 'nfds' argument.
+ * Select uses bit masks of file descriptors in longs.
+ * These macros manipulate such bit fields (the filesystem macros use chars).
+ * FD_SETSIZE may be defined by the user, but the default here
+ * should be >= NOFILE (param.h).
  */
 #ifndef	FD_SETSIZE
 #define	FD_SETSIZE	1024
 #endif
 
-#define __NBBY 8	/* number of bits per byte */
-
-#if (_MIPS_SZLONG == 32)
-typedef	long	fd_mask_t;
-typedef	unsigned long	ufd_mask_t;
-#endif
-#if (_MIPS_SZLONG == 64)
-typedef	int	fd_mask_t;
-typedef	unsigned int	ufd_mask_t;
-#endif
-
-#define	__NFDBITS	(int)(sizeof(fd_mask_t) * __NBBY) /* bits per mask */
-#define	__howmany(x, y)	(((x)+((y)-1))/(y))
-
-#if _SGIAPI
-typedef struct fd_set {
-#else
-typedef struct {
-#endif
-	fd_mask_t	fds_bits[__howmany(FD_SETSIZE, __NFDBITS)];
-} fd_set;
-
-#define	FD_SET(n, p)	((p)->fds_bits[(n)/__NFDBITS] |= (fd_mask_t) (1 << ((n) % __NFDBITS)))
-#define	FD_CLR(n, p)	((p)->fds_bits[(n)/__NFDBITS] &= (fd_mask_t) ~(1 << ((n) % __NFDBITS)))
-#define	FD_ISSET(n, p)	((p)->fds_bits[(n)/__NFDBITS] & (fd_mask_t) (1 << ((n) % __NFDBITS)))
-
-
-#if _SGIAPI
-#include <string.h>
-#endif
-
-__SGI_LIBC_BEGIN_NAMESPACE_STD
-
-#if !defined(_SIZE_T) && !defined(_SIZE_T_)
-#define _SIZE_T
-#if (_MIPS_SZLONG == 32)
-typedef unsigned int    size_t;
-#endif
-#if (_MIPS_SZLONG == 64)
-typedef unsigned long   size_t;
-#endif
-#endif
-
-__SGI_LIBC_END_NAMESPACE_STD
-
-__SGI_LIBC_USING_FROM_STD(size_t)
-
-
-#if _SGIAPI
-#define FD_ZERO(p)      memset((void *)(p), 0, sizeof(*(p)))
-#else
-extern void *__memset(void *, int, size_t);
-#define FD_ZERO(p)      __memset((void *)(p), 0, sizeof(*(p)))
-#endif /* _SGIAPI */
-
-#if _SGIAPI || defined(_BSD_TYPES)
-
-/*
- * These are all backward compatibility for non XPG4 permitted symbols
- */
 #ifndef NBBY		/* number of bits per byte */
 #define NBBY 8
 #endif
 
+#if (_MIPS_SZLONG == 32)
+typedef	unsigned long	fd_mask;
+#endif
+#if (_MIPS_SZLONG == 64)
+typedef	unsigned int	fd_mask;
+#endif
+
+#define	NFDBITS	(sizeof(fd_mask) * NBBY)	/* bits per mask */
 #ifndef	howmany
 #define	howmany(x, y)	(((x)+((y)-1))/(y))
 #endif
 
-#define NFDBITS __NFDBITS
+typedef	struct fd_set {
+	fd_mask	fds_bits[howmany(FD_SETSIZE, NFDBITS)];
+} fd_set;
 
-#if (_MIPS_SZLONG == 32)
-typedef	long	fd_mask;
-#endif
-#if (_MIPS_SZLONG == 64)
-typedef	int	fd_mask;
-#endif
+#define	FD_SET(n, p)	((p)->fds_bits[(n)/NFDBITS] |= (1 << ((n) % NFDBITS)))
+#define	FD_CLR(n, p)	((p)->fds_bits[(n)/NFDBITS] &= ~(1 << ((n) % NFDBITS)))
+#define	FD_ISSET(n, p)	((p)->fds_bits[(n)/NFDBITS] & (1 << ((n) % NFDBITS)))
 
-#endif /* _SGIAPI || _BSD_TYPES */
+#ifdef _ABI_SOURCE
+#define FD_ZERO(p)	memset((void *)(p), 0, sizeof(*(p)))
+#else
+#define	FD_ZERO(p)	bzero((char *)(p), sizeof(*(p)))
+#endif /* _ABI_SOURCE */
 
-#ifdef __cplusplus
-}
-#endif
 #endif /* _SYS_SELECT_H */

@@ -13,7 +13,7 @@
  * |         Sunnyvale, CA 94086                               |
  * |-----------------------------------------------------------|
  */
-/* $Header: /isms/cmplrs.src/v7.4/include/RCS/symconst.h,v 7.17 1994/06/02 22:55:40 dlai Exp $ */
+/* $Header: /hosts/bonnie/proj/irix6.4-ssg/isms/cmplrs/include/RCS/symconst.h,v 7.17 1994/06/02 22:55:40 dlai Exp $ */
 
 /* (C) Copyright 1984 by Third Eye Software, Inc.
  *

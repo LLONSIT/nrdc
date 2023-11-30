@@ -22,7 +22,7 @@ extern "C" {
  * |         Sunnyvale, California 94088-3650, USA             |
  * |-----------------------------------------------------------|
  */
-/* $Header: /isms/cmplrs.src/v7.4/include/RCS/ldfcn.h,v 7.14 1995/03/07 23:11:52 davea Exp $ */
+/* $Header: /hosts/bonnie/proj/irix6.4-ssg/isms/cmplrs/include/RCS/ldfcn.h,v 7.14 1995/03/07 23:11:52 davea Exp $ */
 
 /*	Copyright (c) 1984 AT&T	*/
 /*	  All Rights Reserved  	*/

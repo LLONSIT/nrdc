@@ -14,7 +14,7 @@
  * |         Sunnyvale, California 94088-3650, USA             |
  * |-----------------------------------------------------------|
  */
-/* $Header: /plroot/cmplrs.src/v7.4.4m/.RCS/PL/include/RCS/exception.h,v 7.17 2004/01/29 09:04:24 amaury Exp $ */
+/* $Header: /hosts/bonnie/proj/irix6.4-ssg/isms/cmplrs/include/RCS/exception.h,v 7.11 1995/12/11 22:05:15 bean Exp $ */
 #ifndef _EXCEPTION_H
 #define _EXCEPTION_H
 
@@ -67,7 +67,6 @@ extern "C" {
 
 #if (defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS))
 struct sigcontext;
-struct runtime_pdr;
 typedef struct exception_info {
 	long exception;		/* exception identifier */
 	void (*handler) (long, long, struct sigcontext *, 
@@ -208,109 +207,17 @@ extern struct runtime_pdr _procedure_table[];
 
 struct sigcontext;
 
-#if (_MIPS_SIM == _MIPS_SIM_NABI32)
-
 Dwarf_Fde
-find_fde(Elf32_Addr * /*pc*/);
-
-Dwarf_Fde
-find_fde_name(Elf32_Addr * /*pc*/, char ** /*name*/);
-
-#else /* if (_MIPS_SIM == _MIPS_SIM_ABI64) */
-
-Dwarf_Fde
-find_fde(Elf64_Addr * /*pc*/);
-
-Dwarf_Fde
-find_fde_name(Elf64_Addr * /*pc*/, char ** /*name*/);
-
-#endif
+find_fde(Elf64_Addr pc);
 
 void
-exc_unwind(struct sigcontext * /*scp*/, Dwarf_Fde /*fde*/);
+exc_unwind(struct sigcontext *scp, Dwarf_Fde fde);
 
 int
-exc_resume(struct sigcontext * /*scp*/);
+exc_resume(struct sigcontext *scp);
 
 void
-exc_setjmp(struct sigcontext * /*scp*/);
-
-/* Defines the cache level that libexc will use */
-void exc_set_cache_policy(int /*level*/);
-#pragma optional exc_set_cache_policy
-
-/* libexc demangling policy. If set to 0, the function names are not 
- * demangled (concerns primarily C++, fortran)
- */
-void exc_set_demangle_policy(int /*do_demangle*/);
-#pragma optional exc_set_demangle_policy
-
-/* libexc floating point regs unwinding policy. 
- * If set to 0, the floating point registers are not unwound. 
- * Should be set to 1 for C++ exception handling.
- */
-void exc_set_unwind_fpregs_policy(int /*unwind_fpregs*/);
-#pragma optional exc_set_unwind_fpregs_policy
-
-
-/* libexc name caching policy. If set to 0, the name is not stored into 
- * the cache. There is no impact on libexc's memory or CPU timing.
- */
-void exc_set_procname_policy(int /*save_procname*/);
-#pragma optional exc_set_procname_policy
-
-/* libexc objlist update policy. If set to 1, the update of the internal 
- * object list will be updated every time an object is added to the app.
- * Otherwise, libexc will update its list every time a libexc function
- * is called from outside.
- */
-void exc_set_objlist_update_policy( int /*update*/ );
-#pragma optional exc_set_objlist_update_policy
-
-
-/* defines how libelf will store the ELF sections libexc needs
- * to unwind correctly
- * Default is EXC_LIBELF_USE_MMAP_EACH
- */
-enum __exc_elf_obj_policy {
-    EXC_LIBELF_USE_MMAP_EACH,           /* One mmap per section/header */
-    EXC_LIBELF_USE_ONE_BIG_MMAP,        /* One big mmap of the entire DSO */
-    EXC_LIBELF_USE_ONE_BIG_MALLOC,      /* One big malloc + read of the 
-                                         *  entire file */
-    EXC_LIBELF_USE_MALLOC_EACH          /* One malloc per section/header */
-};
-
-void exc_set_obj_store_policy(enum __exc_elf_obj_policy /*policy*/);
-#pragma optional exc_set_obj_store_policy
-
-/* libexc obj search method policy. 
- * If set to 1, libexc will search for the objects in its interally
- * managed list of objects.
- * Otherwise, libexc will search into the text segments in memory.
- * The internal list of objects will not be updated.
- * Default is 1.
- */
-void exc_set_obj_search_policy( int /*fast_mode*/ );
-#pragma optional exc_set_obj_search_policy
-
-/* libexc verbose level
- * By default, libexc doesn't report any problem unless it ecounters
- * a fatal error.
- * If set to 1, some errors will be reported.
- */
-void exc_set_verbose_level( int /*level*/ );
-#pragma optional exc_set_verbose_level
-
-
-/* Obsolete policy functions - exc_set_dlopen_policy and
- * exc_set_procentry_policy no longer have any effect
- * but but the functions still exist. 
- */
-void exc_set_dlopen_policy(int /*unused*/ );
-#pragma optional exc_set_dlopen_policy
-
-void exc_set_procentry_policy(int /*unused*/ );
-#pragma optional exc_set_procentry_policy
+exc_setjmp(struct sigcontext *scp);
 
 #endif
 

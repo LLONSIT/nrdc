@@ -13,7 +13,7 @@
  * |         Sunnyvale, California 94088-3650, USA             |
  * |-----------------------------------------------------------|
  */
-/* $Header: /isms/cmplrs.src/v7.4/include/RCS/stsupport.h,v 7.7 1992/06/26 14:22:53 daveb Exp $ */
+/* $Header: /proj/irix5.3/isms/cmplrs/include/RCS/stsupport.h,v 7.7 1992/06/26 14:22:53 daveb Exp $ */
 /*
  * Author	Mark I. Himelstein
  * Date Started	5/15/85

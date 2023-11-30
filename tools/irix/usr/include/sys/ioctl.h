@@ -13,7 +13,7 @@ extern "C" {
 #endif
 
 /*#ident	"@(#)kern-port:sys/ioctl.h	10.2"*/
-#ident	"$Revision: 3.15 $"
+#ident	"$Revision: 3.10 $"
 /*
  *	Ioctl commands
  */
@@ -29,11 +29,6 @@ extern "C" {
 #define	DIOCGETC	(DIOC|1)
 #define	DIOCGETB	(DIOC|2)
 #define	DIOCSETE	(DIOC|3)
-
-/* The following are used for setting GBR registers on xbow & bridge */
-#define GIOC	('g'<<8)
-#define GIOCSETBW	(GIOC|1)
-#define GIOCRELEASEBW	(GIOC|2)
 
 /*
  * Ioctl's have the command encoded in the lower word,

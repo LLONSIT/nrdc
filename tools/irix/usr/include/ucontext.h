@@ -27,22 +27,32 @@
 #ifndef _UCONTEXT_H
 #define _UCONTEXT_H
 
-#ident "$Revision: 1.6 $"
-
-#include <sys/ucontext.h>
-#include <internal/sgimacros.h>
-
-__SGI_LIBC_BEGIN_EXTERN_C
-
-extern int getcontext(ucontext_t *);
-extern int setcontext(const ucontext_t *);
-extern int swapcontext(ucontext_t *, const ucontext_t *);
-extern void makecontext(ucontext_t *, void(*)(), int, ...);
-
-#if (defined(_COMPILER_VERSION) && (_COMPILER_VERSION >= 730))
-#pragma unknown_control_flow (getcontext,swapcontext)
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-__SGI_LIBC_END_EXTERN_C
+#ident "$Revision: 1.1 $"
+
+#include <sys/ucontext.h>
+
+#if defined(_MODERN_C)
+
+extern int getcontext(ucontext_t *);
+extern int setcontext(ucontext_t *);
+extern int swapcontext(ucontext_t *, ucontext_t *);
+extern void makecontext(ucontext_t *, void(*)(), int, ...);
+
+#else
+
+extern int getcontext();
+extern int setcontext();
+extern int swapcontext();
+extern void makecontext();
+
+#endif
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif 	/* _UCONTEXT_H */

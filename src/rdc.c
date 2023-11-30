@@ -9,10 +9,12 @@
 #include <unistd.h>
 #include "types.h"
 
+#ifdef __GNUC__
 extern void swab (const void *__restrict __from, void *__restrict __to,
                   ssize_t __n) __THROW __nonnull ((1, 2))
     __attr_access ((__read_only__, 1, 3))
     __attr_access ((__write_only__, 2, 3));
+#endif
 
 typedef struct {
     char GameTitle[0x1B]; //!< Specified by -i

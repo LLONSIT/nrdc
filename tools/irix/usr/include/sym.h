@@ -14,7 +14,7 @@
  * |         Sunnyvale, California 94088-3650, USA             |
  * |-----------------------------------------------------------|
  */
-/* $Header: /isms/cmplrs.src/v7.4/include/RCS/sym.h,v 7.23 1997/04/03 00:25:03 bean Exp $ */
+/* $Header: /hosts/bonnie/proj/irix6.4-ssg/isms/cmplrs/include/RCS/sym.h,v 7.22 1995/01/11 18:11:27 davea Exp $ */
 #ifndef __SYM_H__
 #define __SYM_H__
 
@@ -320,8 +320,7 @@ typedef struct __sgi_extr__ {
 	unsigned weakext:1;	/* symbol is weak external */
 	unsigned deltacplus:1;	/* symbol is delta C++ symbol */
 	unsigned multiext:1;	/* symbol may be defined multiple times */
-	unsigned optionalext:1;	/* symbol is optional external */
-	unsigned reserved:10;	/* reserved for future use */
+	unsigned reserved:11;	/* reserved for future use */
 	unsigned short	ifd;	/* where the iss and index fields point into */
 	SYMR	asym;		/* symbol for the external */
 	} EXTR, *pEXTR;

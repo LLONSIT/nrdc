@@ -13,7 +13,7 @@
  * |         Sunnyvale, California 94088-3650, USA             |
  * |-----------------------------------------------------------|
  */
-/* $Header: /isms/cmplrs.src/v7.4/include/RCS/sgidlfcn.h,v 1.1 1993/08/30 18:52:12 lilian Exp $ */
+/* $Header: /hosts/bonnie/proj/irix6.4-ssg/isms/cmplrs/include/RCS/sgidlfcn.h,v 1.1 1993/08/30 18:52:12 lilian Exp $ */
 /*	Copyright (c) 1988 AT&T	*/
 /*	  All Rights Reserved  	*/
 

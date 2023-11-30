@@ -15,7 +15,7 @@
  * |-----------------------------------------------------------|
  */
 
-/* $Header: /isms/cmplrs.src/v7.4/include/RCS/svr4_math.h,v 1.3 1993/06/08 01:20:14 bettina Exp $ */
+/* $Header: /hosts/bonnie/proj/irix6.4-ssg/isms/cmplrs/include/RCS/svr4_math.h,v 1.3 1993/06/08 01:20:14 bettina Exp $ */
 
 #ifndef __SVR4_MATH_H__
 #define __SVR4_MATH_H__

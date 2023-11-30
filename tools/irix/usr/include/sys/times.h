@@ -14,18 +14,13 @@ extern "C" {
 
 /* sys/times.h */
 
-#ident	"$Revision: 3.14 $"
+#ident	"$Revision: 3.12 $"
 
 #include <sys/types.h>
 
 #ifndef _CLOCK_T
 #define _CLOCK_T
-#if _MIPS_SZLONG == 32
 typedef long	clock_t;
-#endif
-#if _MIPS_SZLONG == 64
-typedef int	clock_t;
-#endif
 #endif /* !_CLOCK_T */
 
 /*
@@ -39,7 +34,11 @@ struct tms {
 };
 
 #ifndef _KERNEL
+#if defined(_MODERN_C)
 extern clock_t	times (struct tms *);
+#else
+extern clock_t	times ();
+#endif /* _MODERN_C */
 
 #endif /* !_KERNEL */
 

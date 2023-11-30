@@ -1,5 +1,4 @@
-/* Copyright (C) 1989, 2001 Silicon Graphics, Inc. 
-   All rights reserved.  */
+/* Copyright (C) 1989 Silicon Graphics, Inc. All rights reserved.  */
 /*
  * |-----------------------------------------------------------|
  * | Copyright (c) 1991, 1990 MIPS Computer Systems, Inc.      |
@@ -15,17 +14,10 @@
  * |         Sunnyvale, California 94088-3650, USA             |
  * |-----------------------------------------------------------|
  */
-/* $Header: /isms/cmplrs.src/v7.4/include/RCS/obj_list.h,v 7.6 2001/10/24 19:57:30 davea Exp $ */
+/* $Header: /proj/irix5.3/isms/cmplrs/include/RCS/obj_list.h,v 7.5 1993/06/08 01:16:58 bettina Exp $ */
 
 #ifndef __OBJ_LIST_H__
 #define __OBJ_LIST_H__
-/*
-	This should be used only for apps that are o32.
-	It is used by rld(1) at run time to communicate
-	the list of DSOs to a debugger and other tools.
-	See obj.h for a slightly fuller discussion of the 
-	ABI compatibility issues.
-*/
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,19 +28,6 @@ typedef struct obj_list {
 	struct obj_list	*next;
 	struct obj_list	*prev;			/* back link */
 } objList;
-/*
-	The above declaration is useless for a -64 app to read
-	an o32 app's DSO list since the struct element sizes mismatch:
-	unsigned long and pointer are not the same size o32 vs -64.
-
-        One is probably better off
-        not #including this
-        if the app being built is -n32 or -64.
-	Create your own struct using
-	   "unsigned int" elements.
-
-*/
-
 
 #define LIST_BEGINNING	0
 #define LIST_END	1

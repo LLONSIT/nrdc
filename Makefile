@@ -16,7 +16,7 @@ ROOT = tools/irix
 
 DIR = src
 
-AVOID_UB ?= 1
+AVOID_UB ?= 0 #Probably going to be necessary soon
 
 #Yes, is this the 90's style?
 
@@ -32,7 +32,7 @@ C_FILES = 	$(DIR)/rdc.c\
 SGI_CFLAGS :=  -I /usr/include/ -g0 -O1 -KPIC -mips1 -fullwarn -wlint,-fph -Wab,-r4300_mul -Xcpluscomm -nostdinc
 
 ifeq ($(CROSS),1)
- CFLAGS := -g0 -O1 -KPIC -mips1 -fullwarn -wlint,-fph -Wab, -Xcpluscomm -nostdinc -I $(ROOT)/usr/include
+ CFLAGS := -g0 -O1 -KPIC -mips1 -fullwarn -wlint,-fph -Wab, -Xcpluscomm -nostdinc -woff 649,838,712 -I $(ROOT)/usr/include
  CC := /usr/bin/qemu-irix -silent -L $(ROOT) $(ROOT)/usr/bin/cc
 else
  CFLAGS := -Wall -O1 -ggdb3 -fPIC -Wno-unused-function -Wno-incompatible-pointer-types

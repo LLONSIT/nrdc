@@ -1,6 +1,6 @@
 /**************************************************************************
  *									  *
- * 		 Copyright (C) 1990-1995 Silicon Graphics, Inc.		  *
+ * 		 Copyright (C) 1990-1993 Silicon Graphics, Inc.		  *
  *									  *
  *  These coded instructions, statements, and computer programs  contain  *
  *  unpublished  proprietary  information of Silicon Graphics, Inc., and  *
@@ -14,7 +14,7 @@
  */
 #ifndef __SYS_SYSCALL_H__
 #define __SYS_SYSCALL_H__
-#ident	"$Revision: 1.40 $"
+#ident	"$Revision: 1.29 $"
 
 #if defined(_LANGUAGE_ASSEMBLY)
 /*
@@ -27,92 +27,50 @@
  * v0 is immediately before the syscall instrcution
  */
 	.globl	_cerror
-#if (_MIPS_SIM == _ABIO32)
+#define JCERROR						\
+	la	t9, _cerror;				\
+	j	t9
+
 	.globl	_cerror64
-#endif /* _MIPS_SIM == _ABIO32 */
-
-#if (_MIPS_SIM == _ABIO32)
-#define JCERROR						\
-	LA	t9, _cerror;				\
+#define	JCERROR64					\
+	la	t9, _cerror64;				\
 	j	t9
-#define JCERROR64					\
-	LA	t9, _cerror64;				\
-	j	t9
-#endif /* _MIPS_SIM == _ABIO32 */
 
-#if (_MIPS_SIM == _ABI64 || _MIPS_SIM == _ABIN32)
-#define JCERROR						\
-	LA	t9, _cerror;				\
-	.cpreturn;					\
-	j	t9
-#endif /* _MIPS_SIM == _ABI64 || _MIPS_SIM == _ABIN32 */
+#ifdef PIC
 
-#ifdef _PIC
-
-#if (_MIPS_SIM == _ABIO32)
-#define EPILOGUE                                        \
-        .set    noreorder;                              \
-9:                                                      \
-        move    t8, ra;         /* save old ra */       \
-        bal     10f;            /* find addr of cpload */\
-        nop;                                            \
-10:                                                     \
-        .cpload ra;                                     \
-        move    ra, t8;                                 \
-        .set    reorder;                                \
-        JCERROR
-
-#define EPILOGUE64                                      \
-        .set    noreorder;                              \
-9:                                                      \
-        move    t8, ra;         /* save old ra */       \
-        bal     10f;            /* find addr of cpload */\
-        nop;                                            \
-10:                                                     \
-        .cpload ra;                                     \
-        move    ra, t8;                                 \
-        .set    reorder;                                \
-        JCERROR64
-#endif /* _MIPS_SIM == _ABIO32 */
-
-#if (_MIPS_SIM == _ABI64 || _MIPS_SIM == _ABIN32)
-#define EPILOGUE					\
+#define EPILOGUE_BODY					\
 	.set	noreorder;				\
-    	.cplocal	t0;				\
 9:							\
 	move	t8, ra;		/* save old ra */	\
 	bal	10f;		/* find addr of cpload */\
 	nop;						\
 10:							\
-    	.cpsetup	ra, t0, 10b;			\
-	.set	reorder;				\
+	.cpload ra;					\
 	move	ra, t8;					\
-	LA	t9, _cerror;				\
-    	j	t9
+	.set	reorder
 
-#endif /*  _MIPS_SIM == _ABI64 || _MIPS_SIM == _ABIN32 */
+#else /* PIC */
 
-#else /* _PIC */
-
-#define EPILOGUE					\
+#define EPILOGUE_BODY					\
 9:							\
-	.set	reorder;				\
+	.set	reorder
+
+#endif /* PIC */
+
+#define	EPILOGUE					\
+	EPILOGUE_BODY;					\
 	JCERROR
 
-#if (_MIPS_SIM == _ABIO32)
 #define EPILOGUE64					\
-9:							\
-	.set	reorder;				\
+	EPILOGUE_BODY;					\
 	JCERROR64
-#endif	/* _MIPS_SIM == _ABIO32 */
-
-#endif /* _PIC */
 
 #define SYSCALL(x)	GSYSCALL(x,x)
 #define PSEUDO(x,y)	GSYSCALL(x,y)
 
 #define	GSYSCALL(x,y)					\
 .weakext	x, _/**/x;				\
+PICOPT;							\
 LEAF(_/**/x);						\
 	.set	noreorder;				\
 	li	v0,SYS_/**/y;				\
@@ -124,15 +82,13 @@ LEAF(_/**/x);						\
 	j	ra;					\
 	nop;						\
 	EPILOGUE;					\
-	.end	_/**/x
+	.end	x
 
-#if (_MIPS_SIM == _ABIO32)
 #define	RET64(x)					\
 	j	ra;					\
 	nop;						\
 	EPILOGUE64;					\
-	.end	_/**/x
-#endif /* _MIPS_SIM == _ABIO32 */
+	.end	x
 
 #endif /* ASSEMBLY */
 
@@ -141,7 +97,6 @@ LEAF(_/**/x);						\
  */
 #if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
 #include "sys/types.h"
-#include <sys.s>	/* syscall numbers with kernel offset SYSVoffset */
 
 #ifndef _KERNEL
 /*
@@ -152,6 +107,7 @@ LEAF(_/**/x);						\
  * (which start with 1) since the same bit would be set for both 
  * the /debug and /proc interfaces.
  */
+#include <sys.s>	/* syscall numbers with kernel offset SYSVoffset */
 #undef SYSVoffset
 #define SYSVoffset	1
 #endif /* !_KERNEL */
@@ -212,6 +168,7 @@ typedef unsigned short sysargdesc_t;
 	
 #ifdef _KERNEL
 
+#define MAX_SYSARGS	6
 /*
  * Structure of the system-entry table
  */
@@ -220,11 +177,10 @@ extern struct sysent {
 	char	sy_flags;	/* various flag bits (see below) */
 	int	(*sy_call)();	/* handler */
 	sysargdesc_t *sy_argdesc; /* descriptors for args */
-} sysent[], irix5_64_sysent[];
+} sysent[];
 
+#define	SY_SETJMP	0x01	/* if setjmp() is necessary before syscall */
 #define	SY_INDIR	0x02	/* another routine will do demultiplexing */
-#define SY_SPAWNER	0x04	/* syscall creates new processes (for PROF) */
-#define SY_64BIT_ARG	0x08	/* Tell o32 kernel syscall has 64bit arg */
 #define	SY_FULLRESTORE	0x10	/* restore all regs */
 #define SY_NOXFSZ	0x40	/* do not send SIGXFSZ if EFBIG error */
 #define SY_NORESTART	0x80	/* don't restart these syscalls */
@@ -235,10 +191,13 @@ extern struct sysent {
 struct syscallsw {
 	struct	sysent	*sc_sysent;		/* pointer to sysent table */
 	unsigned sc_nsysent;			/* table size */
+	int	(*sc_maperrno)(int);		/* function to remap errnos */
+	int	sc_flags;			/* everything has flags! */
+	int	(*sc_mapsignal)(int);		/* function to remap signals */
+	int	(*sc_uipc_ioctl)(int, int, char *);   /* remap uipc ioctls */
 };
 
 extern struct syscallsw	syscallsw[];		/* defined in os/main.c */
-typedef	int (*sy_call_t)(sysarg_t *, void *, uint);
 
 #endif /* _KERNEL */
 

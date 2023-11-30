@@ -1,8 +1,9 @@
+/* Copyright Mark */
 #ifndef __OBJ_EXT_H
 #define __OBJ_EXT_H
 #include <elf.h>
 #include <sys/elf.h>
-#include <msym.h>
+#include <cmplrs/msym.h>
 extern unsigned long
 foreach_section(
 	struct obj	*obj,
@@ -289,7 +290,7 @@ extern unsigned long
 address_to_procedure(
 	struct obj	*obj,
 	unsigned long	pc);
-extern int newprocedure(
+extern newprocedure(
 	unsigned long addr,
         long sym,
         long iline,
@@ -364,7 +365,7 @@ symbol_name(
 	struct obj	*obj,
 	long	        symbol);
 extern struct symr *user_symbol_alloc();
-extern int user_symbol_free();
+extern user_symbol_free();
 extern union auxu *user_type_alloc();
 extern long newsymbol(
 char * name,
@@ -372,7 +373,7 @@ int st,
 int sc,
 struct obj_type *type,
 int val);
-extern int
+extern 
 modify_user_symbol(
 long sym,
 int st,
@@ -451,12 +452,12 @@ extern unsigned long
 address_to_line(
 	struct obj	*obj,
 	unsigned long	address);
-extern long iline_to_line(
+extern iline_to_line(
 	     struct obj       *obj,
 	     struct fdr       *pfd,
 	     struct pdr       *ppd,
              long             iline);
-extern int set_line(
+extern set_line(
 		struct obj     *obj,
 		long           file,
                 long           procedure,
@@ -475,8 +476,6 @@ obj_raw_bits(struct obj *obj, char *sectname);
 extern int
 obj_section_reloc_type(struct obj *obj,
 		       int i);
-extern int
-get_section_num(struct obj *obj);
 extern struct obj *
 obj_sym_open(struct obj *obj,
 	     char *objname);

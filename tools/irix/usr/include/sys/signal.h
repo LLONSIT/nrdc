@@ -1,14 +1,4 @@
-/**************************************************************************
- *									  *
- * 		 Copyright (C) 1990-1997 Silicon Graphics, Inc.		  *
- *									  *
- *  These coded instructions, statements, and computer programs  contain  *
- *  unpublished  proprietary  information of Silicon Graphics, Inc., and  *
- *  are protected by Federal copyright law.  They  may  not be disclosed  *
- *  to  third  parties  or copied or duplicated in any form, in whole or  *
- *  in part, without the prior written consent of Silicon Graphics, Inc.  *
- *									  *
- **************************************************************************/
+/* Copyright (C) 1989-1992 Silicon Graphics, Inc. All rights reserved.  */
 /*	Copyright (c) 1984 AT&T	*/
 /*	  All Rights Reserved  	*/
 
@@ -19,29 +9,52 @@
 #ifndef _SYS_SIGNAL_H
 #define _SYS_SIGNAL_H
 
-#include <standards.h>
-#include <internal/sgimacros.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#ident	"$Revision: 3.148 $"
+#ident	"$Revision: 3.97 $"
 
-/*
- * NOTE: this file is NOT included in strict ANSI mode anymore.
+/* ANSI C Notes:
+ *
+ * - THE IDENTIFIERS APPEARING OUTSIDE OF #ifdef's IN THIS
+ *   standard header ARE SPECIFIED BY ANSI!  CONFORMANCE WILL BE ALTERED
+ *   IF ANY NEW IDENTIFIERS ARE ADDED TO THIS AREA UNLESS THEY ARE IN ANSI's
+ *   RESERVED NAMESPACE. (i.e., unless they are prefixed by __[a-z] or
+ *   _[A-Z].  For external objects, identifiers with the prefix _[a-z]
+ *   are also reserved.)
+ *
+ * - Section 4.7 indicates that identifiers beginning with SIG or SIG_
+ *   followed by an upper-case letter are added to the reserved namespace
+ *   when including <signal.h>.
+ * POSIX Notes:
+ *	Alas, POSIX permits SIG_ but not SIG
  */
 
 /*
- * Signal Numbers. THESE ARE REPLICATED in signal.h
+ * Signal numbers have changed between IRIX4 and SVR4 ABI
+ */
+
+/*
+ * SVR4 ABI numbers
  */
 #define	SIGHUP	1	/* hangup */
 #define	SIGINT	2	/* interrupt (rubout) */
 #define	SIGQUIT	3	/* quit (ASCII FS) */
 #define	SIGILL	4	/* illegal instruction (not reset when caught)*/
+#ifndef _POSIX_SOURCE
 #define	SIGTRAP	5	/* trace trap (not reset when caught) */
 #define	SIGIOT	6	/* IOT instruction */
+#endif
 #define SIGABRT 6	/* used by abort, replace SIGIOT in the  future */
+#ifndef _POSIX_SOURCE
 #define	SIGEMT	7	/* EMT instruction */
+#endif
 #define	SIGFPE	8	/* floating point exception */
 #define	SIGKILL	9	/* kill (cannot be caught or ignored) */
+#ifndef _POSIX_SOURCE
 #define	SIGBUS	10	/* bus error */
+#endif
 #define	SIGSEGV	11	/* segmentation violation */
 #define	SIGSYS	12	/* bad argument to system call */
 #define	SIGPIPE	13	/* write on a pipe with no one to read it */
@@ -49,45 +62,94 @@
 #define	SIGTERM	15	/* software termination signal from kill */
 #define	SIGUSR1	16	/* user defined signal 1 */
 #define	SIGUSR2	17	/* user defined signal 2 */
+#ifndef _POSIX_SOURCE
 #define	SIGCLD	18	/* death of a child */
+#endif
 #define SIGCHLD 18	/* 4.3BSD's/POSIX name */
+#ifndef _POSIX_SOURCE
 #define	SIGPWR	19	/* power-fail restart */
 #define	SIGWINCH 20	/* window size changes */
 #define	SIGURG	21	/* urgent condition on IO channel */
 #define SIGPOLL 22	/* pollable event occurred */
 #define	SIGIO	22	/* input/output possible signal */
+#endif /* _POSIX_SOURCE */
 #define	SIGSTOP	23	/* sendable stop signal not from tty */
 #define	SIGTSTP	24	/* stop signal from tty */
 #define	SIGCONT	25	/* continue a stopped process */
 #define	SIGTTIN	26	/* to readers pgrp upon background tty read */
 #define	SIGTTOU	27	/* like TTIN for output if (tp->t_local&LTOSTOP) */
+#ifndef _POSIX_SOURCE
 #define SIGVTALRM 28	/* virtual time alarm */
 #define SIGPROF	29	/* profiling alarm */
 #define SIGXCPU	30	/* Cpu time limit exceeded */
 #define SIGXFSZ	31	/* Filesize limit exceeded */
-#define	SIGK32	32	/* Reserved for kernel usage */
-#define SIGFAILSOFT 32	/* Changing to failsoft mode */
-#define	SIGCKPT	33	/* Checkpoint warning */
-#define	SIGRESTART 34	/* Restart warning  */
-#define SIGUME  35	/* Uncorrectable memory error */
-/* Signals defined for Posix 1003.1c. */
-#define SIGPTINTR	47
-#define SIGPTRESCHED	48
+#ifdef _KERNEL 
+#define	_IRIX4_KERN_SIGIO	32 /* for irix4 abi only */
+#else
+#define	SIG32	32	/* Reserved for kernel usage */
+#endif
+#endif
+
+
+#if  !defined(_XOPEN_SOURCE)
 /* Posix 1003.1b signals */
 #define SIGRTMIN	49	/* Posix 1003.1b signals */
 #define SIGRTMAX	64	/* Posix 1003.1b signals */
 
 #if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
-#include <sys/types.h>
-__SGI_LIBC_BEGIN_EXTERN_C
-/*
- * Basic defines and types. Ok for ANSI
- */
-#if defined(_LANGUAGE_C_PLUS_PLUS) || !_SGIAPI
-#define __sigargs	int
+#if (_MIPS_SZPTR == 32)
+typedef union sigval {
+	int	sival_int;
+	void	*sival_ptr;
+} sigval_t;
+#endif
+#if (_MIPS_SZPTR == 64)
+typedef union sigval {
+	long	sival_int;
+	void	*sival_ptr;
+} sigval_t;
+#endif
+#ifdef  _ABI_SOURCE
+
+typedef union notifyinfo {
+	int	nisigno;			/* signal info */
+	void	(*nifunc) (union sigval); 	/* callback data */
+} notifyinfo_t;
+
+typedef struct sigevent {
+	int			sigev_notify;
+	notifyinfo_t		sigev_notifyinfo;
+	sigval_t		sigev_value;
+	unsigned long		sigev_reserved[13];
+	unsigned long		sigev_pad[6];
+} sigevent_t;
+#define sigev_func	sigev_notifyinfo.nifunc
+#define sigev_signo	sigev_notifyinfo.nisigno
+
+#define SIGEV_NONE	128
+#define SIGEV_SIGNAL	129
+#define SIGEV_CALLBACK	130
+
 #else
-#define __sigargs	
-#endif /* _LANGUAGE_C_PLUS_PLUS) || !_SGIAPI */
+typedef struct sigevent {
+	int		sigev_signo;
+	union sigval	sigev_value;
+} sigevent_t;
+#endif /* _ABI_SOURCE */
+#endif	/* _LANGUAGE_C || _LANGUAGE_C_PLUS_PLUS */
+#endif /* !_XOPEN_SOURCE */
+
+#if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
+
+#if defined(_LANGUAGE_C_PLUS_PLUS)
+/*
+ * C++ user's who want/need additional arguments should cast their
+ * function to (SIG_PF)
+ */
+#define _sigargs	...
+#else
+#define _sigargs	
+#endif /* _LANGUAGE_C_PLUS_PLUS) */
 
 /*
  * Almost everyone has gone to a void return type. This lets
@@ -97,70 +159,80 @@ __SGI_LIBC_BEGIN_EXTERN_C
 #define	__sigret_t	void
 #endif
 
-#ifndef SIG_ERR
-/* might have been defined in signal.h */
-typedef __sigret_t	(*SIG_PF) (__sigargs);
+typedef __sigret_t	(*SIG_PF) (_sigargs);
 
-#define SIG_ERR		((SIG_PF)-1L)
-#define	SIG_IGN		((SIG_PF)1L)
-#define	SIG_DFL		((SIG_PF)0L)
+#if defined(_BSD_COMPAT) || defined(_BSD_SIGNALS)
+/*
+ * The next section contains declarations and typedefs for the BSD signal
+ * library routines built on top of the POSIX system calls.  Two of them,
+ * signal() and sigpause(), share names with their SysV counterparts, yet
+ * have different semantics.  By default, the SysV versions are used.
+ * In order to use the BSD versions, you may either:
+ *  1) explicitly call BSDsignal() and BSDsigpause() in the program, or
+ *  2) set one of the _BSD_SIGNALS or _BSD_COMPAT cpp constants before
+ *     including the signal header file. There are 2 methods:
+ *     a) modify the source file, e.g.,
+ *	    #ifdef sgi
+ *          #define _BSD_SIGNALS
+ *          #endif
+ *          #include <signal.h>
+ *     b) use the cc(1) option -D_BSD_SIGNALS or -D_BSD_COMPAT.
+ *        e.g., cc -D_BSD_SIGNALS foo.c -o foo
+ * Note that _BSD_COMPAT affects other header files that deal with BSD
+ * compatibility.
+ */
+
+struct sigvec {
+  __sigret_t (*sv_handler)(_sigargs);	/* SIG_DFL, SIG_IGN, or *fn */
+  int sv_mask;		/* mask to use during handler execution	*/
+  int sv_flags;		/* see signal options below */
+};
+
+
+#define SV_ONSTACK	0x0001
+#define SV_INTERRUPT	0x0002		/* not supported */
+#define sv_onstack	sv_flags	/* compatibility with BSD */
+
+#define NUMBSDSIGS	(32)  /* can't be expanded */
+/* Convert signal number to bit mask representation */
+#define sigmask(sig)	(1L << ((sig)-1))
+
+#define signal		BSDsignal
+#define sigpause	BSDsigpause
+
+extern int	sigpause(int);
+extern int	sigvec(int,struct sigvec *, struct sigvec *);
+struct sigstack;
+extern int	sigstack(struct sigstack *, struct sigstack *);
+extern int	sigblock(int);
+extern int	sigsetmask(int);
+extern int	killpg(int, int);
+extern int	kill(int, int);
+#endif /* BSD */
+
+#define SIG_ERR		((SIG_PF)-1)
+#define	SIG_IGN		((SIG_PF)1)
+#define SIG_HOLD	((SIG_PF)2)
+#define	SIG_DFL		((SIG_PF)0)
+
+#ifndef _KERNEL
+extern __sigret_t	(*signal(int,__sigret_t (*)(_sigargs)))(_sigargs);
 #endif
-#define SIG_HOLD	((SIG_PF)2L)
 
-__SGI_LIBC_END_EXTERN_C
+#if defined(_SVR4_SOURCE) || defined(_POSIX_SOURCE) || defined(_XOPEN_SOURCE)
+#include <sys/types.h>
 
-#if _POSIX93 || _ABIAPI || _XOPEN5
-/*
- * POSIX 1003.1b extensions
- */
-#include <sys/sigevent.h>
-#endif /* _POSIX93 || _ABIAPI || _XOPEN5 */
-
-#if _POSIX93 || _XOPEN4UX || _XOPEN5
-/*
- * POSIX 1003.1b / XPG4-UX extension for signal handler arguments
- */
-#include <sys/siginfo.h>
-#endif /* _POSIX93 || _XOPEN4UX || _XOPEN5 */
-
-__SGI_LIBC_BEGIN_EXTERN_C
-
-/*
- * POSIX90 added types
- */
-#if !defined(_SIGSET_T)
-#define _SIGSET_T
 typedef struct {                /* signal set type */
-        __uint32_t __sigbits[4];
+        __uint32_t sigbits[4];
 } sigset_t;
-#endif
-
-/* these aren't technically in POSIX90, but are permitted.. */
-typedef union __sighandler {
-    	__sigret_t (*sa_handler1)(__sigargs); /* SIG_DFL, SIG_IGN, or *fn */
-#if _POSIX93 || _XOPEN4UX || _XOPEN5
-    	void (*sa_sigaction1)(int, siginfo_t *, void *);
-#endif
-} __sighandler_t;
-#if _SGIAPI
-#define __sa_handler	sa_handler1
-#define __sa_sigaction	sa_sigaction1
-#endif
 
 typedef struct sigaction {
 	int sa_flags;			/* see below for values		*/
-    	__sighandler_t sa_sighandler;	/* function to handle signal */
+	__sigret_t (*sa_handler)(_sigargs);	/* SIG_DFL, SIG_IGN, or *fn */
 	sigset_t sa_mask;		/* additional set of sigs to be	*/
 					/* blocked during handler execution */
 	int sa_resv[2];
 } sigaction_t;
-/*
- * Posix defined two types of handlers. sa_handler is the default type
- * for use by programs that are not requesting SA_SIGINFO.  Programs
- * requesting SA_SIGINFO need to use a handler of type sa_sigaction.
- */
-#define sa_handler	sa_sighandler.sa_handler1
-#define sa_sigaction	sa_sighandler.sa_sigaction1
 
 /*
  * Definitions for the "how" parameter to sigprocmask():
@@ -195,108 +267,29 @@ typedef struct sigaction {
 					/* setting SIGCHLD */
 					/* SJCTRL bit in proc struct.	*/
 
-__SGI_LIBC_END_EXTERN_C
-#if _XOPEN4UX || _XOPEN5 || defined(_BSD_COMPAT) || defined(_BSD_SIGNALS)
-/*
- * Structure used in BSD sigstack call and in X/Open XPG4.
- */
-__SGI_LIBC_BEGIN_EXTERN_C
-struct sigstack {
-	void	*ss_sp;			/* signal stack pointer */
-	int	ss_onstack;		/* current status */
-};
+
+#endif /* _SVR4_SOURCE || _POSIX_SOURCE || _XOPEN_SOURCE */
+
+#if defined(_SVR4_SOURCE) && !defined(_POSIX_SOURCE) 
 
 /* sigaltstack info */
 #define MINSIGSTKSZ	512
 #define SIGSTKSZ	8192
 
-/*
- * stack_t is now defined in sys/ucontext.h so that includers of
- * sys/ucontext.h always get the definition regardless of compilation mode
- */
+struct sigaltstack {
+	char	*ss_sp;
+	int	ss_size;
+	int	ss_flags;
+};
+typedef struct sigaltstack stack_t;
 
 /* defines for ss_flags */
 #define SS_ONSTACK	0x00000001
 #define SS_DISABLE	0x00000002
-__SGI_LIBC_END_EXTERN_C
 
-#include <sys/ucontext.h>
+#endif /* _SVR4_SOURCE && !_POSIX_SOURCE */
 
-#endif	/* _XOPEN4UX || _XOPEN5 */
-
-__SGI_LIBC_BEGIN_EXTERN_C
-#if defined(_BSD_COMPAT) || defined(_BSD_SIGNALS)
-/*
- * The next section contains declarations and typedefs for the BSD signal
- * library routines built on top of the POSIX system calls.  Two of them,
- * signal() and sigpause(), share names with their SysV counterparts, yet
- * have different semantics.  By default, the SysV versions are used.
- * In order to use the BSD versions, you may either:
- *  1) explicitly call BSDsignal() and BSDsigpause() in the program, or
- *  2) set one of the _BSD_SIGNALS or _BSD_COMPAT cpp constants before
- *     including the signal header file. There are 2 methods:
- *     a) modify the source file, e.g.,
- *	    #ifdef sgi
- *          #define _BSD_SIGNALS
- *          #endif
- *          #include <signal.h>
- *     b) use the cc(1) option -D_BSD_SIGNALS or -D_BSD_COMPAT.
- *        e.g., cc -D_BSD_SIGNALS foo.c -o foo
- * Note that _BSD_COMPAT affects other header files that deal with BSD
- * compatibility.
- */
-
-struct sigvec {
-  __sigret_t (*sv_handler)(__sigargs);	/* SIG_DFL, SIG_IGN, or *fn */
-  int sv_mask;		/* mask to use during handler execution	*/
-  int sv_flags;		/* see signal options below */
-};
-
-
-#define SV_ONSTACK	0x0001
-#define SV_INTERRUPT	0x0002		/* not supported */
-#define sv_onstack	sv_flags	/* compatibility with BSD */
-
-#define NUMBSDSIGS	(32)  /* can't be expanded */
-/* Convert signal number to bit mask representation */
-#if _NO_XOPEN5
-#define sigmask(sig)	(1L << ((sig)-1))
-#endif
-
-#define signal		BSDsignal
-#define sigpause	BSDsigpause
-
-extern int	sigpause(int);
-extern int	sigvec(int,struct sigvec *, struct sigvec *);
-extern int	sigstack(struct sigstack *, struct sigstack *);
-extern int	sigblock(int);
-extern int	sigsetmask(int);
-extern int	killpg(pid_t, int);
-extern int	kill(pid_t, int);
-#endif /* BSD */
-
-#ifndef _KERNEL
-#if (_XOPEN4UX || _XOPEN5) && (!defined(_BSD_COMPAT) && !defined(_BSD_SIGNALS))
-/*
- * XPG4-UX adds a few BSD things
- */
-#if _NO_XOPEN5
-#define sigmask(sig)	(1L << ((sig)-1))
-#endif
-extern void	(*bsd_signal(int, void (*)(int)))(int);
-extern int	killpg(pid_t, int);
-extern int	sigstack(struct sigstack *, struct sigstack *);
-
-#endif	/* _XOPEN4UX || _XOPEN5 */
-#endif	/* !_KERNEL */
-
-#ifndef _KERNEL
-__SGI_LIBC_BEGIN_NAMESPACE_STD
-extern __sigret_t	(*signal(int,__sigret_t (*)(__sigargs)))(__sigargs);
-__SGI_LIBC_END_NAMESPACE_STD
-#endif
-
-#if _SGIAPI
+#if defined(_SGI_SOURCE) && !defined(_POSIX_SOURCE) && !defined(_XOPEN_SOURCE)
 /*
  * Information pushed on stack when a signal is delivered. This is used by
  * the kernel to restore state following execution of the signal handler.
@@ -343,23 +336,22 @@ typedef struct sigcontext {
 	__uint64_t	sc_badvaddr;	/* cp0 bad virtual address */
 	__uint64_t	sc_triggersave;	/* state of graphics trigger (SGI) */
 	sigset_t	sc_sigset;	/* signal mask to restore */
-	__uint64_t	sc_fp_rounded_result;	/* for Ieee 754 support */
-	__uint64_t	sc_pad[31];
+	__uint64_t	sc_pad[32];
 } sigcontext_t;
-
-/* manifest to use to determine whether cause register contains the
- * branch delay bit. Some processors (R8K) have the bit in bit 63 while
- * most of the others have it in bit 31
- */
-#define SC_CAUSE_BD	0x8000000080000000LL
- 
 
 #if !defined(_KERNEL) && !defined(_KMEMUSER)
 /* minor compatibility - sc_mask is the first 32 bits (for BSD sigsetmask) */
-#define sc_mask	sc_sigset.__sigbits[0]
+#define sc_mask	sc_sigset.sigbits[0]
 #endif
+/*
+ * Structure used in BSD sigstack call.
+ */
+struct sigstack {
+	char	*ss_sp;			/* signal stack pointer */
+	int	ss_onstack;		/* current status */
+};
 
-#ifdef _LINT
+#if _LINT
 #undef SIG_ERR
 #define SIG_ERR (void(*)())0
 #undef SIG_IGN
@@ -368,9 +360,8 @@ typedef struct sigcontext {
 #define	SIG_HOLD (void (*)())0
 #endif /* _LINT */
 
-#endif /* _SGIAPI */
+#endif /* _SGI_SOURCE && !_POSIX_SOURCE */
 
-__SGI_LIBC_END_EXTERN_C
 #else /* !(_LANGUAGE_C || _LANGUAGE_C_PLUS_PLUS) */
 
 /* Define these for ASSEMBLY and FORTRAN */
@@ -381,7 +372,12 @@ __SGI_LIBC_END_EXTERN_C
 
 #endif /* !(_LANGUAGE_C || _LANGUAGE_C_PLUS_PLUS) */
 
-#if _SGIAPI || _ABIAPI
+
+#if defined(_XOPEN_SOURCE) && defined(_VSX) 
+#define NSIG            65      /* valid signal numbers are from 1 to NSIG-1 */
+#endif /* _XOPEN_SOURCE */
+
+#if defined(_SGI_SOURCE) && !defined(_POSIX_SOURCE) && !defined(_XOPEN_SOURCE)
 #define NSIG            65      /* valid signal numbers are from 1 to NSIG-1 */
 #define MAXSIG		(NSIG-1)    /* actual # of signals */
 #define	NUMSIGS		(NSIG-1)    /* for POSIX array sizes, true # of sigs */
@@ -395,13 +391,11 @@ __SGI_LIBC_END_EXTERN_C
 #define	BRK_OVERFLOW	6	/* overflow check */
 #define	BRK_DIVZERO	7	/* divide by zero check */
 #define	BRK_RANGE	8	/* range error check */
-
-#define BRK_PSEUDO_OP_BIT 0x80
-#define BRK_PSEUDO_OP_MAX 0x3	/* number of pseudo-ops */
-
-#define BRK_CACHE_SYNC	0x80	/* synchronize icache with dcache */
-
 #define	BRK_MULOVF	1023	/* multiply overflow detected */
-#endif /* _SGIAPI || _ABIAPI */
+#endif /* _SGI_SOURCE && !_POSIX_SOURCE */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* !_SYS_SIGNAL_H */

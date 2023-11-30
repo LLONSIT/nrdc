@@ -14,7 +14,7 @@
  * |         Sunnyvale, California 94088-3650, USA             |
  * |-----------------------------------------------------------|
  */
-/* $Header: /isms/cmplrs.src/v7.4/include/RCS/sex.h,v 7.7 1993/06/08 01:18:56 bettina Exp $ */
+/* $Header: /hosts/bonnie/proj/irix6.4-ssg/isms/cmplrs/include/RCS/sex.h,v 7.7 1993/06/08 01:18:56 bettina Exp $ */
 
 /* $Revision: 7.7 $ */
 #ifndef __INCLUDE_SEX_H__

@@ -1,6 +1,9 @@
 #ifndef __TERMIO_H__
 #define __TERMIO_H__
-#ident "$Revision: 1.10 $"
+#ifdef __cplusplus
+extern "C" {
+#endif
+#ident "$Revision: 1.9 $"
 /*
 *
 * Copyright 1992, Silicon Graphics, Inc.
@@ -26,4 +29,7 @@
 /*	actual or intended publication of such source code.	*/
 
 #include <sys/termio.h>
+#ifdef __cplusplus
+}
+#endif
 #endif /* !__TERMIO_H__ */

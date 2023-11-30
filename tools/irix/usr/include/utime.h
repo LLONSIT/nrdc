@@ -1,6 +1,9 @@
 #ifndef __UTIME_H__
 #define __UTIME_H__
-#ident "$Revision: 1.10 $"
+#ifdef __cplusplus
+extern "C" {
+#endif
+#ident "$Revision: 1.8 $"
 /*
 *
 * Copyright 1992, Silicon Graphics, Inc.
@@ -29,11 +32,14 @@
 
 
 #include <sys/utime.h>
-#include <internal/sgimacros.h>
 
-__SGI_LIBC_BEGIN_EXTERN_C
-
+#if defined(_MODERN_C)
 extern int utime(const char *, const struct utimbuf *);
+#else
+extern int utime();
+#endif /* _MODERN_C */
 
-__SGI_LIBC_END_EXTERN_C
+#ifdef __cplusplus
+}
+#endif
 #endif /* !__UTIME_H__ */

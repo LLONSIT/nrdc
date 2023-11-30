@@ -1,5 +1,5 @@
 /*     @(#)fioflags.h	  */
-/*  $Header: /isms/cmplrs.src/v7.4/include/cmplrs/RCS/fioflags.h,v 1.4 1993/11/05 23:10:18 dlai Exp $ */
+/*  $Header: /hosts/bonnie/proj/irix6.4-ssg/isms/cmplrs/include/cmplrs/RCS/fioflags.h,v 1.4 1993/11/05 23:10:18 dlai Exp $ */
 
 /*
 **      This header defines all the external flags that can be set

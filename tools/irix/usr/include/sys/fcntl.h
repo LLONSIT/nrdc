@@ -10,43 +10,25 @@
 /*	actual or intended publication of such source code.	*/
 
 /*#ident	"@(#)kern-port:sys/fcntl.h	10.3"*/
-#ident	"$Revision: 3.79 $"
-
-/*
- * This is POSIX/XPG Header - watch for Name space pollution
- */
-/*#include <standards.h>*/
+#ident	"$Revision: 3.37 $"
 
 #ifndef _SYS_TYPES_H
 #include <sys/types.h>
 #endif
 
-#if _SGIAPI && !defined(_F_FLAGS)
-/* Irix compatibility */
+#if defined(_SGI_SOURCE) && !defined(_POSIX_SOURCE) && !defined(_XOPEN_SOURCE)
+#ifndef _F_FLAGS		/* Irix compatibility */
 #define _F_FLAGS
 /*
  * flags for F_GETFL, F_SETFL
  */
 #define	FNDELAY		0x04	/* Non-blocking I/O */
 #define	FAPPEND		0x08	/* append (writes guaranteed at the end) */
-#define	FSYNC		0x10	/* synchronous write option for files */
-#define	FDSYNC		0x20	/* synchronous write option for data */
-#define	FRSYNC		0x40	/* synchronous data integrity read option */
+#define	FSYNC		0x10	/* synchronous write option */
 #define	FNONBLOCK	0x80	/* Non-blocking I/O */
 #define	FASYNC		0x1000	/* interrupt-driven I/O for sockets */
-#define	FLARGEFILE	0x2000	/* open is large file aware */
 #define	FNONBLK		FNONBLOCK
 #define	FDIRECT		0x8000
-#define FBULK		0x10000	/* loosen semantics for sequential bandwidth */
-#define FLCINVAL	0x20000 /* flush and invalidate cache on last close */
-#define FLCFLUSH	0x40000 /* flush on last close */
-#ifdef _KERNEL
-#define	FDIRENT64	0x8000	/* getdents64 in use, same as FDIRECT */
-
-/* Used by NFS server in uio_fmode */
-#define FNFSREADDIR		0x100000 /* NFSv3 doing READDIRPLUS */
-#define FNFSREADDIR_REPLY	0x200000 /* Results for NFSv3 READDIRPLUS */
-#endif	/* _KERNEL */
 
 /*
  * open only modes
@@ -55,7 +37,8 @@
 #define	FTRUNC	0x0200		/* truncate to zero length */
 #define	FEXCL	0x0400		/* error if already created */
 #define	FNOCTTY	0x0800		/* don't make this tty control term */
-#endif /* _SGIAPI && !defined(_F_FLAGS) */
+#endif	/* _F_FLAGS */
+#endif /* SGI_SOURCE ... */
 
 /*
  * Flag values accessible to open(2) and fcntl(2)
@@ -64,17 +47,17 @@
 #define	O_RDONLY	0
 #define	O_WRONLY	1
 #define	O_RDWR		2
+#if !defined(_POSIX_SOURCE) 
 #define	O_NDELAY	0x04	/* non-blocking I/O */
+#endif /* !defined(_POSIX_SOURCE) */ 
 #define	O_APPEND	0x08	/* append (writes guaranteed at the end) */
-#define	O_SYNC		0x10	/* synchronous write option (POSIX) */
-#define	O_DSYNC		0x20	/* synchronous write option for data (POSIX)*/
-#define	O_RSYNC		0x40	/* synchronous data integrity read (POSIX) */
+#if !defined(_POSIX_SOURCE) || defined(_XOPEN_SOURCE) 
+#define	O_SYNC		0x10	/* synchronous write option */
+#endif /* !defined(_POSIX_SOURCE) || defined(_XOPEN_SOURCE */ 
 #define	O_NONBLOCK	0x80	/* non-blocking I/O (POSIX) */
-#define	O_LARGEFILE	0x2000	/* allow large file opens */
+#if defined(_SGI_SOURCE) && !defined(_POSIX_SOURCE) && !defined(_XOPEN_SOURCE)
 #define O_DIRECT	0x8000	/* direct I/O */
-#define O_BULK		0x10000	/* loosen semantics for sequential bandwidth */
-#define O_LCINVAL	0x20000 /* flush and invalidate on last close */
-#define O_LCFLUSH	0x40000 /* flush on last close */
+#endif /* SGI && !POSIX && !XOPEN */
 /*
  * Flag values accessible only to open(2).
  */
@@ -90,27 +73,19 @@
 #define	F_GETFL		3	/* Get file flags */
 #define	F_SETFL		4	/* Set file flags */
 
+#define	F_GETLK		14	/* Get file lock */
+
 #define	F_SETLK		6	/* Set file lock */
 #define	F_SETLKW	7	/* Set file lock and wait */
+
+#if !defined(_POSIX_SOURCE) 
 #define	F_CHKFL		8	/* Unused */
-
-#define F_CLOSEM	9	/* close file descriptors */
-
 #define	F_ALLOCSP	10	/* Reserved */
 #define	F_FREESP	11	/* Free file space */
+
+#if defined(_SGI_SOURCE)
 #define	F_SETBSDLK	12	/* Set Berkeley record lock */
 #define	F_SETBSDLKW	13	/* Set Berkeley record lock and wait */
-#define	F_GETLK		14	/* Get file lock */
-#define	F_CHKLK		15	/* check for file locks - internal use only */
-#define	F_CHKLKW	16	/* check for file locks - internal use only */
-#define	F_CLNLK		17	/* clean file locks - internal use only */
-
-#define F_RSETLK	20	/* Remote SETLK for NFS */
-#define F_RGETLK	21	/* Remote GETLK for NFS */
-#define F_RSETLKW	22	/* Remote SETLKW for NFS */
-#define	F_GETOWN	23	/* Get owner (sock emulation) - sockets only */
-#define	F_SETOWN	24	/* Set owner (sock emulation) - sockets only */
-
 #define	F_DIOINFO	30	/* get direct I/O parameters */
 #define	F_FSGETXATTR	31	/* get extended file attributes (xFS) */
 #define	F_FSSETXATTR	32	/* set extended file attributes (xFS) */
@@ -121,31 +96,21 @@
 #define	F_FREESP64	37	/* Free 64 bit file space */
 #define	F_GETBMAP	38	/* Get block map (64 bit only) */
 #define	F_FSSETDM	39	/* Set DMI event mask and state (XFS only) */
-#define F_RESVSP	40	/* Reserve file space. Allocate space for the 
-				 * file without zeroing file data or changing 
-				 * file size */
-#define F_UNRESVSP	41	/* Remove file space. */
-#define F_RESVSP64	42	/* Reserv 64 bit file space */
-#define F_UNRESVSP64	43	/* Remove 64 bit file space */
-#define	F_GETBMAPA	44	/* Get block map for attributes (64 bit only) */
-#define	F_FSGETXATTRA	45	/* get extended file attributes (xFS-A) */
-#define F_SETBIOSIZE	46	/* set preferred buffered I/O size (XFS-only) */
-#define F_GETBIOSIZE	47	/* get preferred buffered I/O size (XFS-only) */
+#endif /* defined(_SGI_SOURCE) */
 
-#define F_GETOPS        50      /* get operation table */
-#define	F_DMAPI		51	/* get XFS DMAPI info (internal use only) */
-#define	F_FSYNC		52	/* fsync a range of pages */
-#define	F_FSYNC64	53	/* fsync a range of pages */
+#define F_RSETLK	20	/* Remote SETLK for NFS */
+#define F_RGETLK	21	/* Remote GETLK for NFS */
+#define F_RSETLKW	22	/* Remote SETLKW for NFS */
 
-#define	F_GETBDSATTR	54	/* get attributes for a BDS filesystem */
-#define	F_SETBDSATTR	55	/* set attributes for a BDS filesystem */
-#define F_GETBMAPX	56	/* Get block map (extended interface) */
-#define F_SETPRIO	57	/* set file io priority */
-#define F_GETPRIO	58	/* get file io priority */
-
-#define F_OPLKREG	59	/* register an oplock request on a file */
-#define F_OPLKSTAT	60	/* get an oplock state change */
-#define F_OPLKACK	61	/* acknowledge an oplock state change */
+/* only for sockets */
+#define	F_GETOWN	23	/* Get owner (socket emulation) */
+#define	F_SETOWN	24	/* Set owner (socket emulation) */
+#if defined(_KERNEL) || defined(_KMEMUSER)
+#define	F_O_GETLK	5	/* SVR3 Get file lock */
+#define	F_O_GETOWN	10
+#define	F_O_SETOWN	11
+#endif /* _KERNEL || _KMEMUSER */
+#endif /* !defined(_POSIX_SOURCE) */ 
 
 #if !defined(LANGUAGE_C_PLUS_PLUS) || !defined(_BSD_COMPAT)
 /*
@@ -158,14 +123,10 @@ typedef struct flock {
 	off_t	l_len;		/* len == 0 means until end of file */
         long	l_sysid;
         pid_t	l_pid;
-	long	l_pad[4];		/* reserve area */
+	long	pad[4];		/* reserve area */
 } flock_t;
 
-#ifdef _KERNEL
-#define l_nodeid    l_pad[0]    /* used for CXFS sysid */
-#endif
-
-#if _LFAPI
+#if defined(_SGI_SOURCE) && !defined(_POSIX_SOURCE) && !defined(_XOPEN_SOURCE)
 /*
  * File segment locking set data type for 64 bit access.
  */
@@ -176,9 +137,9 @@ typedef struct flock64 {
 	off64_t	l_len;		/* len == 0 means until end of file */
         long	l_sysid;
         pid_t	l_pid;
-	long	l_pad[4];		/* reserve area */
+	long	pad[4];		/* reserve area */
 } flock64_t;
-#endif /* _LFAPI */
+#endif
 
 #if defined(_KERNEL) || defined(_KMEMUSER)
 typedef struct o_flock {
@@ -207,7 +168,7 @@ typedef struct o_flock {
 #define	O_ACCMODE	3	/* Mask for file access modes */
 #define	FD_CLOEXEC	1	/* close on exec flag */
 
-#if _SGIAPI
+#if defined(_SGI_SOURCE) && !defined(_POSIX_SOURCE) && !defined(_XOPEN_SOURCE)
 
 /*
  * NOTE: This flag is checked only for graphics processes.  It is for
@@ -215,14 +176,6 @@ typedef struct o_flock {
  */
 #define FD_NODUP_FORK	4	/* don't dup fd on fork (sproc overrides) */
 
-struct biosize {
-	__uint32_t 	biosz_flags;
-	__int32_t	biosz_read;
-	__int32_t	biosz_write;
-	__int32_t	dfl_biosz_read;
-	__int32_t	dfl_biosz_write;
-};
-	
 /* 
  * direct I/O attribute record used with F_DIOINFO
  * d_miniosz is the min xfer size, xfer size multiple and file seek offset
@@ -235,14 +188,13 @@ struct dioattr {
 };
 
 /*
- * Structure for F_FSGETXATTR[A] and F_FSSETXATTR.
+ * Structure for F_FSGETXATTR and F_FSSETXATTR.
  */
 struct fsxattr {
-	__uint32_t 	fsx_xflags;	/* xflags field value (get/set) */
-	__uint32_t 	fsx_extsize;	/* extsize field value (get/set) */
-	__uint32_t 	fsx_nextents;	/* nextents field value (get) */
-	__uint32_t 	fsx_projid;	/* project identifier (get/set) */
-	char		fsx_pad[12];
+	unsigned long	fsx_xflags;	/* xflags field value (get/set) */
+	unsigned long	fsx_extsize;	/* extsize field value (get/set) */
+	unsigned long	fsx_nextents;	/* nextents field value (get) */
+	uuid_t		fsx_uuid;	/* uuid field value (get) */
 };
 
 /*
@@ -260,85 +212,6 @@ struct getbmap {
 	__int32_t	bmv_entries;	/* # of entries filled in (output) */
 };
 
-/*
- *	Structure for F_GETBMAPX.  The fields bmv_offset through bmv_entries
- *	are used exactly as in the getbmap structure.  The getbmapx structure
- *	has additional bmv_iflags and bmv_oflags fields. The bmv_iflags field
- *	is only used for the first structure.  It contains input flags 
- *	specifying F_GETBMAPX actions.  The bmv_oflags field is filled in
- *	by the F_GETBMAPX command for each returned structure after the first.
- */
-struct getbmapx {
-	__int64_t	bmv_offset;	/* file offset of segment in blocks */
-	__int64_t	bmv_block;	/* starting block (64-bit daddr_t) */
-	__int64_t	bmv_length;	/* length of segment, blocks */
-	__int32_t	bmv_count;	/* # of entries in array incl. first */
-	__int32_t	bmv_entries;	/* # of entries filled in (output). */
-	__int32_t	bmv_iflags;	/* input flags (1st structure) */
-	__int32_t	bmv_oflags;	/* output flags (after 1st structure) */
-	__int32_t	bmv_unused1;	/* future use */
-	__int32_t	bmv_unused2;	/* future use */
-};
-
-/*	bmv_iflags values - set by F_GETBMAPX caller.	*/
-
-#define	BMV_IF_ATTRFORK		0x1	/* return attr fork rather than data */
-#define BMV_IF_NO_DMAPI_READ	0x2	/* Do not generate DMAPI read event */
-#define BMV_IF_PREALLOC		0x4	/* return status BMV_OF_PREALLOC if required*/
-
-#define BMV_IF_VALID		(BMV_IF_ATTRFORK|BMV_IF_NO_DMAPI_READ|BMV_IF_PREALLOC)
-
-/*	bmv_oflags values - returned from F_GETBMAPX for each non-header segment */
-
-#define BMV_OF_PREALLOC		0x1	/* segment is unwritten pre-allocation */
-
-/*	Convert getbmap <-> getbmapx - move fields from p1 to p2. */
-
-#define	GETBMAP_CONVERT(p1,p2) { \
-	p2.bmv_offset = p1.bmv_offset; \
-	p2.bmv_block = p1.bmv_block; \
-	p2.bmv_length = p1.bmv_length; \
-	p2.bmv_count = p1.bmv_count; \
-	p2.bmv_entries = p1.bmv_entries;  }
-
-#ifdef	_KERNEL
-
-/*	Kernel only bmv_iflags value.	*/
-#define	BMV_IF_EXTENDED	0x40000000	/* getpmapx if set */
-#define	BMV_IF_KERNEL	0x20000000	/* called from kernel if set */
-#endif	/* _KERNEL */
-
-
-/*
- * Structure for F_FSSETDM.
- * For use by backup and restore programs to set the XFS on-disk inode
- * fields di_dmevmask and di_dmstate.  These must be set to exactly and
- * only values previously obtained via xfs_bulkstat!  (Specifically the
- * xfs_bstat_t fields bs_dmevmask and bs_dmstate.)
- */
-struct fsdmidata {
-	__int32_t	fsd_dmevmask;	/* corresponds to di_dmevmask */
-	unsigned short	fsd_padding;
-	unsigned short	fsd_dmstate;	/* corresponds to di_dmstate  */
-};
-
-/*
- * Structure for F_OPLKSTAT (oplock state).
- * Get the identity and state of an oplock whose state has changed due to
- * an external file reference.
- */
-typedef struct oplock_stat {
-	__int32_t	os_state;
-	__uint32_t	os_dev;
-	__uint64_t	os_ino;
-} oplock_stat_t;
-/* oplock state values */
-#define OP_NONE 0
-#define OP_REVOKE 1
-#define OP_LEVELII 2
-#define OP_BREAKDOWN 3
-#define OP_EXCLUSIVE 4
-
-#endif /* _SGIAPI */
+#endif /* SGI && !POSIX && !XOPEN */
 
 #endif /* !__SYS_FNCTL_H__ */

@@ -12,7 +12,11 @@
 #ifndef __ULOCKS_H__
 #define __ULOCKS_H__
 
-#ident "$Revision: 3.56 $ $Author: csturtiv $"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ident "$Revision: 3.50 $ $Author: jwag $"
 
 #if (defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS))
 #include <sys/types.h>
@@ -20,9 +24,6 @@
 #include <stdio.h>
 #endif
 #include <limits.h>
-#include <internal/sgimacros.h>
-
-__SGI_LIBC_BEGIN_EXTERN_C
 
 #define _DEFUSUSERS	 8	/* default number of users */
 #define _MAXUSUSERS	10000	/* maximum number of users allowed */
@@ -94,9 +95,6 @@ __SGI_LIBC_BEGIN_EXTERN_C
 #define CS_HISTOFF	18
 #define CS_RECURSIVEON	19
 #define CS_RECURSIVEOFF	20
-#define CS_QUEUEFIFO	21
-#define CS_QUEUEPRIO	22
-
 
 /* The possible h_op - operations on a semaphore used in history logging */
 #define HOP_PHIT	1	/* us[c]psema:got sema w/o waiting */
@@ -120,7 +118,7 @@ typedef void usptr_t;
  * Spinlock data structures.
  */
 typedef struct lockmeter_s {
-	int	lm_spins;			/* # times lock spun out */
+	int	lm_spins;
 	int	lm_tries;			/* # times lock requested */
 	int	lm_hits;			/* # times lock acquired */
 } lockmeter_t;
@@ -203,7 +201,6 @@ extern void barrier(barrier_t *, unsigned);
 #define usctllock	(*_ctlock)
 #define usdumplock	(*_dlock)
 #define uscas		(*_cas)
-#define uscas32		(*_cas32)
 
 /*
  * Routine prototypes.
@@ -240,7 +237,6 @@ extern int		ustestlock(ulock_t);
 extern int		usctllock(ulock_t, int, ...);
 extern int		usdumplock(ulock_t, FILE *, const char *);
 extern int		uscas(void *, ptrdiff_t, ptrdiff_t, usptr_t *);
-extern int		uscas32(void *, int32_t, int32_t, usptr_t *);
 
 /* SEMAPHORES */
 extern usema_t		*usnewsema(usptr_t *, int);
@@ -262,32 +258,22 @@ extern int		usclosepollsema(usema_t *);
 #if defined(_LANGUAGE_FORTRAN)
 /* LOCKS */
 	INTEGER*4 ussetlock, usunsetlock, usnewlock, usinitlock
-	INTEGER*4 uswsetlock, uscsetlock, ustestlock, usctllock, uscas, uscas32
+	INTEGER*4 uswsetlock, uscsetlock, ustestlock, usctllock, uscas
 
 /* ARENA */
-#if (_MIPS_SZPTR == 64)
-	INTEGER*8 usconfig, usinit, usgetinfo
-	INTEGER*8 usmalloc, usrealloc, uscalloc, usrecalloc
-#else
 	INTEGER*4 usconfig, usinit, usgetinfo
-	INTEGER*4 usmalloc, usrealloc, uscalloc, usrecalloc
-#endif
-	INTEGER*4 usmallopt
+	INTEGER*4 usmalloc, usrealloc, uscalloc, usmallopt
 
 /* SEMAPHORES */
-
-#if (_MIPS_SZPTR == 64)
-	INTEGER*8 usnewsema, usnewpollsema
-#else
-	INTEGER*4 usnewsema, usnewpollsema
-#endif
-	INTEGER*4 usinitsema, uspsema, uscpsema, usvsema
+	INTEGER*4 usnewsema, usinitsema, uspsema, uscpsema, usvsema
 	INTEGER*4 ustestsema, usctlsema, usdumpsema
-	INTEGER*4 usfreepollsema, usopenpollsema, usclosepollsema
+	INTEGER*4 usnewpollsema, usfreepollsema, usopenpollsema, usclosepollsema
 
 #endif /* (_LANGUAGE_FORTRAN) */
 
-__SGI_LIBC_END_EXTERN_C
+#ifdef __cplusplus
+}
+#endif
 
 #include <task.h>
 

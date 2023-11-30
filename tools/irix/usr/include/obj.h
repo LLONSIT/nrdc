@@ -4,8 +4,6 @@
  * as a mark used by Makefile to add the copyright to the file it
  * creates called obj_ext.h.
  */
-/* Copyright (C) 1989, 2001 Silicon Graphics, Inc.
-     All rights reserved.  */
 /* $Copyright: |
  * |-----------------------------------------------------------|
  * | Copyright (c) 1991, 1990 MIPS Computer Systems, Inc.      |
@@ -21,17 +19,10 @@
  * |         Sunnyvale, California 94088-3650, USA             |
  * |-----------------------------------------------------------|
  * $ */
-/* $Header: /isms/cmplrs.src/v7.4/include/RCS/obj.h,v 7.29 2001/10/24 19:57:11 davea Exp $ */
+/* $Header: /proj/irix5.3/isms/cmplrs/include/RCS/obj.h,v 7.28 1994/08/23 22:31:19 ajp Exp $ */
 
 #ifndef __OBJ_H__
 #define __OBJ_H__
-/*
-	What follows is only useful when using
-	cc -32 (o32 MIPS/SGI ABI).
-	See  the comment at the end of this file for
-	hints on getting at the o32 data when
-	compiling n32 or -64.
-*/
 
 #ifdef __cplusplus
 extern "C" {
@@ -170,7 +161,6 @@ typedef struct obj {
 	Elf32_Addr	o_symlib;	/* address of symbol library section */
 	Elf32_Addr	o_rld_text_resolve_addr;    /* recorded address of rld's text resolve function */
 } OBJ, *pOBJ;
-
 #define cbOBJ sizeof(OBJ)
 
 #ifdef _OBJ_USE_MACRO
@@ -461,59 +451,6 @@ typedef struct obj {
 
 #endif
 #endif /* _ELF */
-
-
-/*
-        The above declarations and macros are 
-        useless for a  or -n32 -64 app to read
-        an o32 app's DSO list since the struct element 
-	sizes mismatch.
-        unsigned long and pointer are not the same 
-	  size o32 vs -64.
-	struct stat is not the same size n32 vs o32.
-	So it's not reasonably possible to define a struct 
-    	here that matches the o32 struct (for n32 or -64 apps).
-
-	None of the macros above can be used either.
-
-        #include <stdio.h>
-        #include <obj.h>
-        #include <obj_list.h>
-        #define OO(a) ((char*)(&(o.a))-(char*)(&o))
-        main()
-        {
-        OBJ o;
-        char *x,*y;
-        
-        x = (char *)(&o);
-        y = (char *)(&(o.o_path));
-        
-        printf("sizeof(OBJ) = %d\n",sizeof(o));
-        printf("offset of o_praw = %d\n",OO(o_praw));
-        printf("offset of o_path = %d\n",OO(o_path));
-        printf("offset of o_text_size = %d\n",OO(o_text_size));
-        }
-
-	The above shows:
-	proton 69% cc -32 objsize.c
-	proton 70% ./a.out
-	sizeof(OBJ) = 432
-	offset of o_praw = 196
-	offset of o_path = 236
-	offset of o_text_size = 256
-
-	A program an use information like the above
-	to get offsets to correctly access
-	fields of the o32 structure from an n32 or -64
-        application inspecting a running o32 application
-	(using /proc, or example: see "man 4 proc").
-
-	One is probably better off
-	not #including this or obj_list.h
-	if the app being built is -n32 or -64.
-	Just use the information from this header
-	as a hint.
-*/
 
 #ifdef __cplusplus
 }

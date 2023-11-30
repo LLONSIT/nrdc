@@ -24,7 +24,7 @@ extern "C" {
  * Copyright 1985 by MIPS Computer Systems, Inc.
  */
 
-#ident	"$Revision: 1.79 $"
+#ident	"$Revision: 1.53 $"
 
 /* System call numbers */
 /* These must match with the table entries appearing in os/sysent.c */
@@ -198,7 +198,7 @@ extern "C" {
 /* Posix.1 signal calls */
 #define SYS_ksigaction	(162+SYSVoffset)
 #define SYS_sigpending	(163+SYSVoffset)
-#define SYS_ksigprocmask (164+SYSVoffset)
+#define SYS_sigprocmask	(164+SYSVoffset)
 #define SYS_sigsuspend	(165+SYSVoffset)
 
 /* Posix.4 signal calls */
@@ -236,75 +236,6 @@ extern "C" {
 /* SVR4.2 ES-MP syscall */
 #define	SYS_pread	(187+SYSVoffset)
 #define	SYS_pwrite	(188+SYSVoffset)
-	/* Posix.4 sync I/O calls */
-#define	SYS_fdatasync	(189+SYSVoffset)
-/* special SGI internal syscall */
-#define	SYS_sgifastpath (190+SYSVoffset)        
-
-/* attribute operations */
-#define	SYS_attr_get	(191+SYSVoffset)        
-#define	SYS_attr_getf	(192+SYSVoffset)        
-#define	SYS_attr_set	(193+SYSVoffset)        
-#define	SYS_attr_setf	(194+SYSVoffset)        
-#define	SYS_attr_remove	(195+SYSVoffset)        
-#define	SYS_attr_removef (196+SYSVoffset)        
-#define	SYS_attr_list	(197+SYSVoffset)        
-#define	SYS_attr_listf	(198+SYSVoffset)        
-#define	SYS_attr_multi	(199+SYSVoffset)        
-#define	SYS_attr_multif	(200+SYSVoffset)        
-
-#define	SYS_statvfs64	(201+SYSVoffset)
-#define	SYS_fstatvfs64	(202+SYSVoffset)
-
-#define	SYS_getmountid	(203+SYSVoffset)
-
-/* new sproc */
-#define	SYS_nsproc	(204+SYSVoffset)
-
-#define	SYS_getdents64	(205+SYSVoffset)
-#define	SYS_afs_syscall	(206+SYSVoffset)
-#define	SYS_ngetdents	(207+SYSVoffset)
-#define	SYS_ngetdents64	(208+SYSVoffset)
-
-/* Trusted Irix */
-#define SYS_sgi_sesmgr	(209+SYSVoffset)
-	
-/* checkpoint/restart pidsprocsp */
-#define	SYS_pidsprocsp	(210+SYSVoffset)
-/* remote exec */
-#define SYS_rexec		(211+SYSVoffset)
-/* POSIX timer calls */
-#define	SYS_timer_create	(212+SYSVoffset)
-#define	SYS_timer_delete	(213+SYSVoffset)
-#define	SYS_timer_settime	(214+SYSVoffset)
-#define	SYS_timer_gettime	(215+SYSVoffset)
-#define	SYS_timer_getoverrun	(216+SYSVoffset)
-/* POSIX scheduler calls */	
-#define	SYS_sched_rr_get_interval	(217+SYSVoffset)
-#define	SYS_sched_yield		(218+SYSVoffset)
-#define	SYS_sched_getscheduler	(219+SYSVoffset)
-#define	SYS_sched_setscheduler	(220+SYSVoffset)
-#define	SYS_sched_getparam	(221+SYSVoffset)
-#define	SYS_sched_setparam	(222+SYSVoffset)
-#define	SYS_usync_cntl		(223+SYSVoffset)
-#define	SYS_psema_cntl		(224+SYSVoffset)
-/* checkpoint/restart return from restart */
-#define	SYS_restartreturn	(225+SYSVoffset)
-#define SYS_sysget		(226+SYSVoffset)
-/* XPG4 socket calls */
-#define SYS_xpg4_recvmsg	(227+SYSVoffset)
-/* UserMode Filesystem call */
-#define SYS_umfscall		(228+SYSVoffset)
-/* nsproc for checkpoint */
-#define	SYS_nsproctid		(229+SYSVoffset)
-/* Remote exec complete - Cellular IRIX, kernel-internal only */
-#define SYS_rexec_complete	(230+SYSVoffset)
-#define SYS_xpg4_sigaltstack	(231+SYSVoffset)
-#define SYS_xpg4_select		(232+SYSVoffset)
-#define SYS_xpg4_setregid	(233+SYSVoffset)
-#define	SYS_linkfollow		(234+SYSVoffset)
-#define	SYS_utimets		(235+SYSVoffset)
-#define SYS_xpg5_recvmsg	(236+SYSVoffset)
 #ifdef __cplusplus
 }
 #endif
